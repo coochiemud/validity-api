@@ -1,0 +1,81 @@
+
+Loaded document: documents/freddie-mac.txt (19611 chars)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  VALIDITY — RUNNING ANALYSIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Stage 1  Extracting candidate commitments...
+         43 candidate(s) identified.
+
+
+         Reviewed 43 claim(s): 43 confirmed, 0 rejected, 0 annotated.
+         43 claim(s) proceeding to translation.
+
+Stage 2  Translating confirmed claims to formal logic...
+         32 validated  |  11 refused (outside fragment)
+
+Stage 3  Encoding constraints and running formal verification...
+         Z3 verdict: sat
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  VALIDITY ANALYSIS REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Verdict:          ✓ CLEAN — No contradiction proven
+  Claims analysed:  32
+  Claims refused:   11
+  LFS version:      2.0
+  Timestamp:        2026-05-25T23:21:10.606439+00:00
+  Document hash:    0803e29a71a21ec3...
+
+  No contradiction provable within analysed fragment.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  OUTSIDE FRAGMENT  (11 claim(s) refused)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  "Not later than two Business Days prior to each Payment Date, the Indenture Trustee shall calculate the Transfer Amount, Return Reimbursement Amount and Return Amount, if any, payable pursuant to Sections 2 and 3 and deliver a payment notification substantially in the form of Exhibit A (“Payment Notification”) to Freddie Mac and the Trust."
+  Rule: TRANSLATION  Reason: Unresolved modal term in source text: 'substantially'
+  Escalation: human_attestation_required
+
+  "The events that may give rise to an Early Termination Date shall be as set forth in the definition of “Early Termination Date” in the Glossary."
+  Rule: TRANSLATION  Reason: The claim contains unresolvable modal terms and ambiguity regarding the definition and conditions of 'Early Termination Date'.
+  Escalation: human_attestation_required
+
+  "The performance of the Reference Pool during the period commencing at the end of the final Reporting Period and continuing until the Termination Date shall be disregarded under this Agreement for purposes of calculating the final payment obligations."
+  Rule: TRANSLATION  Reason: The claim involves a temporal period rather than a discrete point in time, which cannot be represented using At. The phrase 'shall be disregarded' also introduces ambiguity in terms of obligation or prohibition.
+  Escalation: human_attestation_required
+
+  "to cure any ambiguity or to correct, modify or supplement any provision herein which may be inconsistent with any other provision herein or to correct any error;"
+  Rule: TRANSLATION  Reason: The claim contains unresolvable modal terms and ambiguity regarding the specific actions required to cure, correct, modify, or supplement provisions.
+  Escalation: human_attestation_required
+
+  "to modify, alter, amend, add to or rescind any provision herein to comply with any applicable rules, regulations, orders or directives promulgated from time to time;"
+  Rule: TRANSLATION  Reason: The claim contains unresolvable modal terms and ambiguity regarding compliance with unspecified rules and regulations.
+  Escalation: human_attestation_required
+
+  "to add to any covenants of Freddie Mac, the Sponsor or the Administrator for the benefit of the Noteholders or to surrender any right or power conferred upon Freddie Mac, the Sponsor or the Administrator;"
+  Rule: TRANSLATION  Reason: The claim contains unresolvable ambiguity regarding the specific obligation or action required.
+  Escalation: human_attestation_required
+
+  "no such amendment for the specific purposes described in clauses (iii) through (v) above shall adversely affect in any material respect the interests of the Noteholders"
+  Rule: TRANSLATION  Reason: Unresolved modal term in source text: 'material'
+  Escalation: human_attestation_required
+
+  "in each case, Freddie Mac, the Sponsor, the Administrator and the Indenture Trustee shall have received a Tax Opinion"
+  Rule: TRANSLATION  Reason: Quantifier 'ForAll' at 'root.operand' nested inside deontic operator — forbidden by LFS v2
+  Escalation: human_attestation_required
+
+  "This Agreement may also be amended from time to time by mutual written agreement of the parties hereto and, if any Notes are outstanding, with the written consent of the Indenture Trustee and the consent of Holders of Notes entitled to at least a majority of the aggregate outstanding Class Principal Balance of the Notes that are materially and adversely affected by such amendment"
+  Rule: TRANSLATION  Reason: Unresolved modal term in source text: 'materially'
+  Escalation: human_attestation_required
+
+  "This Agreement shall be valid, binding, and enforceable against a party when executed and delivered by an authorized individual on behalf of the party by means of (i) an original manual signature; (ii) a faxed, scanned, or photocopied manual signature, or (iii) any other electronic signature permitted by the federal Electronic Signatures in Global and National Commerce Act, state enactments of the Uniform Electronic Transactions Act, and/or any other relevant electronic signatures law"
+  Rule: TRANSLATION  Reason: Quantifier 'ForAll' at 'root.operand' nested inside deontic operator — forbidden by LFS v2
+  Escalation: human_attestation_required
+
+  "It is expressly understood and agreed by the parties hereto that (i) this Agreement is executed and delivered by Wilmington Trust, National Association on behalf of the Trust not individually or personally but solely as owner trustee of the Trust under the Trust Agreement of the Trust dated the date hereof in the exercise of the powers and authority conferred upon and vested in Wilmington Trust, National Association as owner trustee of the Trust under such Trust Agreement, (ii) each of the representations, undertakings and agreements herein made on the part of the Trust is made and intended not as the personal representation, undertaking or agreement of Wilmington Trust, National Association, but is made and intended for the purpose of binding only the Trust and (iii) nothing herein contained shall be construed as creating any liability on the part of Wilmington Trust, National Association, individually or personally, to perform any covenant or obligation of the Trust, either expressed or implied, contained herein, all such liability, if any, being expressly waived by the parties hereto and by any Person claiming by, through or under the parties hereto."
+  Rule: TRANSLATION  Reason: The claim contains complex legal language and disclaimers that introduce ambiguity and unresolvable modal terms, making it unsuitable for translation into the supported logical fragment.
+  Escalation: human_attestation_required
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
