@@ -1,0 +1,281 @@
+EXECUTION VERSION
+COLLATERAL ADMINISTRATION AGREEMENT 
+dated as of October 16, 2024 
+among 
+FREDDIE MAC MSCR TRUST MN9, 
+as Trust, 
+FEDERAL HOME LOAN MORTGAGE CORPORATION, 
+and 
+U.S. BANK TRUST COMPANY, NATIONAL ASSOCIATION, 
+as Indenture Trustee 
+
+1 
+THIS COLLATERAL ADMINISTRATION AGREEMENT, dated as of October 16, 2024 (as the same may 
+be amended, modified or supplemented from time to time, this “Agreement”) is by and among Freddie Mac MSCR 
+Trust MN9 (the “Trust”), Federal Home Loan Mortgage Corporation (“Freddie Mac”), and U.S. Bank Trust 
+Company, National Association, as indenture trustee (the “Indenture Trustee”). 
+WITNESSETH: 
+WHEREAS, the Trust proposes to issue the Notes pursuant to the Indenture of even date herewith (as 
+amended, supplemented or modified from time to time, the “Indenture”), among the Trust, U.S. Bank Trust Company, 
+National Association, as Indenture Trustee and Custodian, and U.S. Bank National Association, as Account Bank; 
+WHEREAS, the parties desire for the Trust to provide credit protection with respect to the Reference 
+Obligations to Freddie Mac in exchange for the payment of certain amounts by Freddie Mac to the Trust and other 
+consideration more fully described herein; 
+WHEREAS, the cash proceeds from the sale of the Notes shall be deposited with the Custodian for 
+investment in Eligible Investments, and with respect to each Payment Date, proceeds of Eligible Investments shall be 
+allocated to pay the Return Amount, if any, due from the Trust to Freddie Mac on such Payment Date prior to being 
+allocated to pay amounts owed on the Notes, including any Notes Retirement Amount due from the Trust to Freddie 
+Mac on such Payment Date; and 
+WHEREAS, the parties desire to enter into this Agreement in order to effect the foregoing. 
+NOW THEREFORE, in consideration of these premises and other good and valuable consideration, the 
+receipt and sufficiency of which are hereby acknowledged, the parties agree as follows:
+Section 1.  Defined Terms and Rules of Construction. Reference is made to the Glossary of Defined Terms 
+and Rules of Construction (as the same may be supplemented, amended or modified, the “Glossary”) attached as 
+Exhibit A to the Indenture. The Glossary is incorporated herein by reference. Capitalized terms used but not otherwise 
+defined herein shall have the respective meanings assigned thereto in the Glossary. 
+Section 2.  Payments Due from Freddie Mac. Subject to Sections 4 and 6, on the Business Day prior to 
+each Payment Date, Freddie Mac shall pay to the Trust, by deposit into the Distribution Account or otherwise, (a) the 
+Transfer Amount and (b) the Return Reimbursement Amount, if any, due with respect to such Payment Date. 
+Section 3.  Payments Due from the Trust. Subject to Sections 4 and 6, on each Payment Date on which a 
+Tranche Write-down Amount shall be allocated to any Class of Reference Tranche corresponding to an outstanding 
+Class of Notes and which reduces the Class Principal Balance of such Corresponding Class of Notes, the Indenture 
+Trustee, on behalf of the Trust, shall pay to Freddie Mac, by deposit into an account designated by Freddie Mac, the 
+applicable Return Amount on such Payment Date.  The payment obligation of the Trust to pay the Return Amount 
+under this Agreement shall be limited to amounts on deposit in the Custodian Account. 
+Section 4.  Netting of Payments. The sum of the Capital Contribution Amount and the Transfer Amount 
+that Freddie Mac shall owe to the Trust with respect to any Payment Date shall not be less than zero. For the avoidance 
+of doubt, with respect to each Payment Date, the sum of the payments due from Freddie Mac to the Trust pursuant to 
+Section 2 above and Section 2 of the Capital Contribution Agreement on the Business Day prior to such Payment Date 
+shall be netted against any payment due from the Trust to Freddie Mac pursuant to Section 3 above on such Payment 
+Date.  The parties acknowledge and agree that, as a result, only one party (i.e., either the Trust or Freddie Mac) shall 
+actually make a payment to the other party in connection with any Payment Date. 
+Section 5.  Tax Treatment. Payments under this Agreement shall be treated for federal income tax purposes 
+as provided in the Indenture. 
+Section 6.  Conditions to Payment. The obligation of Freddie Mac to pay any Transfer Amount and/or 
+Return Reimbursement Amount and the obligation of the Trust to pay any Return Amount pursuant to Sections 2 and 
+3, respectively, shall be subject to the following conditions precedent: 
+(a) 
+receipt by the Indenture Trustee of the monthly “Reference Pool File” for the related 
+Payment Date in accordance with the terms of the Indenture; 
+(b) 
+the Termination Date has not occurred as of any prior Payment Date; and 
+(c) 
+receipt by Freddie Mac and the Trust of a Payment Notification pursuant to Section 7. 
+
+2 
+Section 7.  Calculations. 
+(a) 
+Not later than two Business Days prior to each Payment Date, the Indenture Trustee shall 
+calculate the Transfer Amount, Return Reimbursement Amount and Return Amount, if any, payable pursuant to 
+Sections 2 and 3 and deliver a payment notification substantially in the form of Exhibit A (“Payment Notification”) 
+to Freddie Mac and the Trust. 
+(b) 
+Solely for purposes of this Section 7, the Indenture Trustee may conclusively rely upon the 
+information provided to it under the Indenture for inclusion in each Payment Notification (including, without 
+limitation, the amount of any investment earnings on Eligible Investments) and shall have no duty hereunder to verify 
+or recompute any such information. 
+Section 8.  [Intentionally omitted]. 
+Section 9.  Term of Agreement. 
+(a)
+This Agreement shall terminate in its entirety on the Termination Date, which date shall be 
+the earlier to occur of the Scheduled Termination Date and the Early Termination Date. 
+(b)
+The events that may give rise to an Early Termination Date shall be as set forth in the 
+definition of “Early Termination Date” in the Glossary.  To the extent an Early Termination Date shall occur as a 
+result of a designation by a party to this Agreement, such Early Termination Date shall occur on the first Payment 
+Date following the date on which such notice becomes effective, unless such notice becomes effective five Business 
+Days or less prior to such Payment Date, in which case the Early Termination Date shall occur on the second Payment 
+Date following the date on which such notice becomes effective, in each case, whether or not the relevant Freddie 
+Mac Default or Optional Termination Event is then continuing.  
+(c)
+In the event an Early Termination Date is so designated, no further payments, other than 
+any unpaid amounts that become payable on or prior to such Early Termination Date, together with interest on any 
+overdue amounts, shall be made under this Agreement.  Freddie Mac’s final payment obligations hereunder shall be 
+due on the Business Day prior to the Termination Date and the Trust’s final payment obligations hereunder shall be 
+due on the Termination Date, in each case subject to Sections 4 and 6.  The performance of the Reference Pool during 
+the period commencing at the end of the final Reporting Period and continuing until the Termination Date shall be 
+disregarded under this Agreement for purposes of calculating the final payment obligations. 
+Section 10. Amendments.  
+(a)
+This Agreement may be amended from time to time by mutual written agreement of the 
+Trust and Freddie Mac without the consent of the Indenture Trustee or the Noteholders: 
+(i)
+to correct, modify or supplement any provision herein which may be inconsistent 
+with the Memorandum; 
+(ii)
+to correct, modify or supplement any provision herein which may be inconsistent 
+with any other Basic Document; 
+(iii)
+to cure any ambiguity or to correct, modify or supplement any provision herein 
+which may be inconsistent with any other provision herein or to correct any error; 
+(iv)
+to make any other provisions with respect to matters or questions arising 
+hereunder which may not be inconsistent with the then-existing provisions hereof; 
+(v)
+to modify, alter, amend, add to or rescind any provision herein to comply with 
+any applicable rules, regulations, orders or directives promulgated from time to time; 
+(vi)
+to add to any covenants of Freddie Mac, the Sponsor or the Administrator for the 
+benefit of the Noteholders or to surrender any right or power conferred upon Freddie Mac, the Sponsor or 
+the Administrator; or 
+(vii)
+to acknowledge the successors and permitted assigns of any party hereto and the 
+assumption by any such successor or assign of such party’s covenants and obligations hereunder in 
+accordance with Section 13; 
+
+3 
+provided that no such amendment for the specific purposes described in clauses (iii) through (v) above shall adversely 
+affect in any material respect the interests of the Noteholders, as evidenced by the receipt by the Indenture Trustee of 
+an Opinion of Counsel or an Officer’s Certificate of Freddie Mac to the effect that such change does not adversely 
+affect in any material respect the interests of the Noteholders or, alternatively, in the case of any particular Noteholder, 
+an acknowledgment to that effect from such Noteholder (unless such Noteholder shall have consented to such 
+amendment); and, provided, further that no such amendment may adversely affect Freddie Mac’s interests (unless 
+Freddie Mac shall have consented to such amendment); and, provided further, that no such amendment may adversely 
+affect the interests of the Indenture Trustee (unless the Indenture Trustee shall have consented to such amendment); 
+and, provided further, that in each case, Freddie Mac, the Sponsor, the Administrator and the Indenture Trustee shall 
+have received a Tax Opinion. 
+(b)
+This Agreement may also be amended from time to time by mutual written agreement of 
+the parties hereto and, if any Notes are outstanding, with the written consent of the Indenture Trustee and the consent 
+of Holders of Notes entitled to at least a majority of the aggregate outstanding Class Principal Balance of the Notes 
+that are materially and adversely affected by such amendment, for any other purpose; provided, that no amendment 
+pursuant to this subsection shall be effective unless the Indenture Trustee shall have provided its consent with respect 
+to such amendment in accordance with the provisions of Section 16.03(c) of the Indenture; and, provided further, that 
+in each case, Freddie Mac, the Sponsor, the Administrator and the Indenture Trustee shall have received a Tax 
+Opinion. 
+Section 11.  Notices.  All demands, notices and communications required to be delivered to a party hereunder 
+shall be in writing and shall be deemed to have been duly given if (i) personally delivered, (ii) mailed by registered 
+mail, postage prepaid, (iii) delivered by overnight courier, or (iv) transmitted via email, in each instance at the 
+address(es) specified in or otherwise permitted under the Indenture.   
+Section 12.  Severability. Any provision of this Agreement that is prohibited or unenforceable in any 
+jurisdiction shall be ineffective to the extent of such prohibition or unenforceability without invalidating the remaining 
+provisions hereof and any such prohibition or unenforceability in any jurisdiction shall not invalidate or render 
+unenforceable such provision in any other jurisdiction. 
+Section 13.  Successors and Assigns.  This Agreement shall be binding upon and shall inure to the benefit 
+of the parties and their respective successors, including any successor by operation of law, and permitted assigns.  
+Neither the Trust nor Freddie Mac, without the prior written consent of the other party (in the case of a transfer by the 
+Trust) or without the prior written consent of the Indenture Trustee (in the case of a transfer by Freddie Mac), may 
+transfer (whether by way of security or otherwise) this Agreement or any interest or obligation herein or hereunder, 
+except that: 
+(a) 
+the Trust or Freddie Mac may make such a transfer pursuant to a consolidation or 
+amalgamation with, or merger with or into, or transfer of all or substantially all its assets to, another entity, or, in the 
+case of Freddie Mac, pursuant to, in connection with, or in furtherance of, the termination of its conservatorship (but, 
+in each case, without prejudice to any other right or remedy hereunder);  
+(b) 
+the Trust or Freddie Mac may make such a transfer of all or any part of its interest in any 
+amount payable to it from a defaulting party upon an event of default hereunder; and 
+(c) 
+Freddie Mac may make such a transfer by way of security or by transferring (by way of 
+security or otherwise) all or any part of its right to receive payments under this Agreement but not legal ownership 
+interest (such as the grant of a participation or other transfer of its right to receive payment), subject to its related 
+obligations hereunder. 
+Any purported transfer that is not in compliance with the foregoing terms and conditions shall be void. 
+Section 14.  Electronic Signatures; Counterparts. This Agreement may be executed in one or more 
+counterparts, each of which shall be deemed to be an original, and all of which together shall constitute one and the 
+same instrument. This Agreement shall be valid, binding, and enforceable against a party when executed and delivered 
+by an authorized individual on behalf of the party by means of (i) an original manual signature; (ii) a faxed, scanned, 
+or photocopied manual signature, or (iii) any other electronic signature permitted by the federal Electronic Signatures 
+in Global and National Commerce Act, state enactments of the Uniform Electronic Transactions Act, and/or any other 
+relevant electronic signatures law, including any relevant provisions of the Uniform Commercial Code (collectively, 
+“Signature Law”), in each case to the extent applicable. Each faxed, scanned, or photocopied manual signature, or 
+
+4 
+other electronic signature, shall for all purposes have the same validity, legal effect, and admissibility in evidence as 
+an original manual signature. Each party hereto shall be entitled to conclusively rely upon, and shall have no liability 
+with respect to, any faxed, scanned, or photocopied manual signature, or other electronic signature, of any other party 
+and shall have no duty to investigate, confirm or otherwise verify the validity or authenticity thereof. For the avoidance 
+of doubt, original manual signatures shall be used for execution or indorsement of writings when required under the 
+UCC or other Signature Law due to the character or intended character of the writings. 
+Section 15.  Headings. The section headings in this Agreement have been inserted for convenience of 
+reference only and shall not be construed to affect the meaning, construction or effect of this Agreement. 
+Section 16.  Governing Law; Jurisdiction. THIS AGREEMENT SHALL BE GOVERNED BY AND 
+CONSTRUED IN ACCORDANCE WITH THE LAWS OF THE STATE OF NEW YORK AND THE 
+OBLIGATIONS, RIGHTS AND REMEDIES OF THE PARTIES HEREUNDER SHALL BE DETERMINED IN 
+ACCORDANCE WITH SUCH LAWS WITHOUT REGARD TO THE CONFLICTS OF LAWS PROVISIONS 
+THEREOF (OTHER THAN SECTION 5-1401 OF THE GENERAL OBLIGATIONS LAW).  EACH PARTY 
+HERETO HEREBY SUBMITS (TO THE EXTENT PERMITTED BY APPLICABLE LAW) TO THE NON-
+EXCLUSIVE JURISDICTION OF THE COURTS OF THE STATE OF NEW YORK AND THE UNITED STATES 
+DISTRICT COURT LOCATED IN THE BOROUGH OF MANHATTAN IN NEW YORK CITY, SOLELY WITH 
+RESPECT TO MATTERS ARISING UNDER THIS AGREEMENT, AND EACH WAIVES (TO THE EXTENT 
+PERMITTED BY APPLICABLE LAW) PERSONAL SERVICE OF ANY AND ALL PROCESS UPON IT AND 
+CONSENTS THAT ALL SUCH SERVICE OF PROCESS BE MADE BY REGISTERED MAIL IN 
+ACCORDANCE WITH SECTION 11 AND SERVICE SO MADE SHALL BE DEEMED TO BE COMPLETED 
+UPON RECEIPT THEREOF. 
+Section 17.  The Owner Trustee.  It is expressly understood and agreed by the parties hereto that (i) this 
+Agreement is executed and delivered by Wilmington Trust, National Association on behalf of the Trust not 
+individually or personally but solely as owner trustee of the Trust under the Trust Agreement of the Trust dated the 
+date hereof in the exercise of the powers and authority conferred upon and vested in Wilmington Trust, National 
+Association as owner trustee of the Trust under such Trust Agreement, (ii) each of the representations, undertakings 
+and agreements herein made on the part of the Trust is made and intended not as the personal representation, 
+undertaking or agreement of Wilmington Trust, National Association, but is made and intended for the purpose of 
+binding only the Trust and (iii) nothing herein contained shall be construed as creating any liability on the part of 
+Wilmington Trust, National Association, individually or personally, to perform any covenant or obligation of the 
+Trust, either expressed or implied, contained herein, all such liability, if any, being expressly waived by the parties 
+hereto and by any Person claiming by, through or under the parties hereto. 
+[Remainder of Page Intentionally Left Blank] 
+
+[MSCR 2024-MN9 – Signature Page to Collateral Administration Agreement] 
+IN WITNESS WHEREOF, the parties have caused this Collateral Administration Agreement to be duly 
+executed and delivered as of the date first above written. 
+FREDDIE MAC MSCR TRUST MN9 
+By: 
+Wilmington Trust, National Association, not in its 
+individual capacity but solely as Owner Trustee 
+By: 
+Name:  Kenean Tesfaye 
+Title:    Assistant Vice President 
+
+[MSCR 2024-MN9 -Signature Page to Collateral Administration Agreement]
+FEDERAL HOME LOAN MORTGAGE CORPORATION 
+By: 
+Name: Ling Xu 
+Title:   Vice President—Multifamily Investments and Portfolio 
+Management
+
+[MSCR 2024-MN9 -Signature Page to Collateral Administration Agreement]
+U.S. BANK TRUST COMPANY, 
+NATIONAL ASSOCIATION, 
+as Indenture Trustee 
+By: 
+Name:
+Title: Vice President
+
+EXHIBIT A 
+FORM OF PAYMENT NOTIFICATION 
+[________], 20[__] 
+Freddie Mac 
+1551 Park Run Drive 
+McLean, VA 22102-3110 
+Attn:  Vice President – Multifamily Investments & Portfolio Management 
+RE:  Freddie Mac MSCR Trust MN9 
+Freddie Mac MSCR Trust MN9 
+c/o Wilmington Trust, National Association, as Owner Trustee 
+1100 North Market Street 
+Wilmington, DE 19890-0001 
+Reference is made to (i) that certain Collateral Administration Agreement, dated as of October 16, 2024 (the 
+“Collateral Administration Agreement”), among Freddie Mac MSCR Trust MN9 (the “Trust”), Federal Home 
+Loan Mortgage Corporation (“Freddie Mac”) and U.S. Bank Trust Company, National Association, as indenture 
+trustee (the “Indenture Trustee”), and (ii) that certain Capital Contribution Agreement, dated as of October 16, 2024 
+(the “Capital Contribution Agreement”), among the Trust, Freddie Mac and the Indenture Trustee. Capitalized 
+terms used and not otherwise defined herein shall have the meanings assigned thereto in the Collateral Administration 
+Agreement or Capital Contribution Agreement, as applicable. 
+Notice is hereby given of the following amounts with respect to the [______], 20[__] Payment Date: 
+Item  
+Amount 
+Investment Liquidation Contribution ................ 
+$ 
+Index Component Contribution ...................... 
+$ 
+Return Amount................................................... 
+$ 
+Return Reimbursement Amount ....................... 
+$ 
+Transfer Amount............................................... 
+$ 
+U.S. BANK TRUST COMPANY,  
+NATIONAL ASSOCIATION, 
+as Indenture Trustee 
+By: 
+Name: 
+Title: 

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validity — Freddie Mac Credit Risk Administration Agreement</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg:          #09090F;
+            --surface:     #0E0E16;
+            --surface2:    #131320;
+            --surface3:    #181828;
+            --border:      rgba(255,255,255,0.055);
+            --border2:     rgba(255,255,255,0.09);
+            --border3:     rgba(255,255,255,0.14);
+            --text:        #D8DCE8;
+            --text-mid:    #7B8499;
+            --text-dim:    #3C4257;
+            --text-faint:  #252A3A;
+            --proof-blue:  #4A7FA5;
+            --proof-blue-dim: rgba(74,127,165,0.10);
+            --ver-green:   #3D7A6A;
+            --ver-green-dim: rgba(61,122,106,0.08);
+            --frag-brass:  #8A7040;
+            --frag-brass-dim: rgba(138,112,64,0.08);
+            --red:         #8A4040;
+            --red-dim:     rgba(138,64,64,0.08);
+            --mono: 'IBM Plex Mono', monospace;
+            --serif: 'IBM Plex Serif', Georgia, serif;
+            --sans: 'IBM Plex Sans', system-ui, sans-serif;
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+        body::before { content:''; position:fixed; inset:0; opacity:0.018; pointer-events:none; z-index:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+        header { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:50px; background:rgba(9,9,15,0.92); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); }
+        .nav-logo img { height:22px; display:block; opacity:0.9; }
+        .nav-label { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+        main { position:relative; z-index:1; max-width:660px; margin:0 auto; padding:80px 48px 140px; }
+        .doc-eyebrow { font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.18em; color:var(--text-dim); margin-bottom:12px; display:block; opacity:0; animation:fadeUp 0.7s ease forwards 0.05s; }
+        .doc-title { font-family:var(--serif); font-size:clamp(18px,2.8vw,26px); font-weight:400; color:var(--text); line-height:1.3; letter-spacing:-0.01em; margin-bottom:40px; opacity:0; animation:fadeUp 0.7s ease forwards 0.10s; }
+        .result-seal { border:1px solid var(--border2); border-radius:6px; overflow:hidden; margin-bottom:52px; opacity:0; animation:fadeUp 0.7s ease forwards 0.16s; }
+        .seal-body { padding:44px 40px 36px; background:var(--surface); border-bottom:1px solid var(--border); }
+        .seal-outcome { font-family:var(--sans); font-size:clamp(22px,3.6vw,32px); font-weight:300; color:var(--text); letter-spacing:-0.025em; margin-bottom:16px; line-height:1.1; }
+        .seal-outcome.contradiction { color:#C47070; }
+        .seal-counts { font-family:var(--mono); font-size:11px; color:var(--text-mid); letter-spacing:0.03em; margin-bottom:24px; }
+        .seal-state-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .seal-pill { font-family:var(--mono); font-size:9px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; padding:4px 11px; border-radius:3px; }
+        .seal-pill.sat { background:var(--ver-green-dim); color:var(--ver-green); border:1px solid rgba(61,122,106,0.22); }
+        .seal-pill.unsat { background:var(--red-dim); color:var(--red); border:1px solid rgba(138,64,64,0.22); }
+        .seal-meta-item { font-family:var(--mono); font-size:10px; color:var(--text-dim); letter-spacing:0.05em; }
+        .seal-sep { color:var(--text-faint); }
+        .seal-footer { display:grid; grid-template-columns:1fr 1fr; background:var(--surface2); }
+        .seal-field { padding:14px 20px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+        .seal-field:nth-child(2n) { border-right:none; }
+        .seal-field:nth-last-child(-n+2) { border-bottom:none; }
+        .seal-field-label { font-family:var(--mono); font-size:8px; text-transform:uppercase; letter-spacing:0.14em; color:var(--text-dim); margin-bottom:5px; }
+        .seal-field-value { font-family:var(--mono); font-size:10px; color:var(--text-mid); word-break:break-all; line-height:1.4; }
+        .seal-field-value.proof { color:var(--proof-blue); }
+        .phil { font-family:var(--serif); font-size:14px; font-style:italic; font-weight:300; color:var(--text-dim); line-height:1.8; padding-bottom:44px; border-bottom:1px solid var(--border); margin-bottom:52px; opacity:0; animation:fadeUp 0.7s ease forwards 0.22s; }
+        .sec-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; }
+        .sec-label { font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.16em; color:var(--text-dim); }
+        .sec-count { font-family:var(--mono); font-size:9px; color:var(--text-dim); letter-spacing:0.06em; }
+
+        /* Contradiction core */
+        .core-section { margin-bottom:52px; opacity:0; animation:fadeUp 0.7s ease forwards 0.25s; }
+        .core-item { border:1px solid rgba(138,64,64,0.20); border-radius:5px; padding:18px 20px; margin-bottom:4px; background:rgba(138,64,64,0.04); }
+        .core-item-id { font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.10em; color:var(--text-dim); margin-bottom:10px; }
+        .core-item-text { font-family:var(--sans); font-size:13px; font-weight:300; color:var(--text); line-height:1.65; font-style:italic; margin-bottom:8px; }
+        .core-item-loc { font-family:var(--mono); font-size:9px; color:var(--text-dim); }
+        .proof-block { background:#060608; border:1px solid var(--border); border-radius:4px; padding:16px 18px; margin-top:4px; }
+        .proof-block-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+        .proof-block-label { font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--text-dim); }
+        .proof-block-state { font-family:var(--mono); font-size:9px; color:var(--red); }
+        .proof-line { font-family:var(--mono); font-size:10px; color:var(--text-dim); line-height:1.85; }
+        .proof-line .c { color:var(--text-mid); }
+        .proof-line .bot { color:var(--red); }
+        .proof-sep { border:none; border-top:1px solid var(--border); margin:10px 0; }
+
+        /* Verified */
+        .verified-section { margin-bottom:52px; opacity:0; animation:fadeUp 0.7s ease forwards 0.27s; }
+        .verified-list { border:1px solid var(--border); border-radius:5px; overflow:hidden; }
+        .verified-item { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:13px 18px; border-bottom:1px solid var(--border); background:var(--surface); transition:background 0.15s; }
+        .verified-item:last-child { border-bottom:none; }
+        .verified-item:hover { background:var(--surface2); }
+        .verified-item-name { font-family:var(--sans); font-size:12px; font-weight:400; color:var(--text); margin-bottom:3px; }
+        .verified-item-desc { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--text-mid); line-height:1.55; }
+        .verified-dot { width:5px; height:5px; border-radius:50%; background:var(--ver-green); flex-shrink:0; margin-top:6px; opacity:0.6; }
+
+        /* Outside fragment */
+        .fragment-section { margin-bottom:52px; opacity:0; animation:fadeUp 0.7s ease forwards 0.32s; }
+        .fragment-intro { font-family:var(--sans); font-size:12px; font-weight:300; color:var(--text-mid); line-height:1.75; margin-bottom:16px; }
+        .fragment-row { border:1px solid var(--border); border-radius:4px; margin-bottom:3px; overflow:hidden; background:var(--surface); }
+        .fragment-row-head { display:flex; align-items:center; gap:10px; padding:12px 16px; cursor:pointer; transition:background 0.15s; user-select:none; }
+        .fragment-row-head:hover { background:var(--surface2); }
+        .frag-tag { font-family:var(--mono); font-size:8px; letter-spacing:0.10em; text-transform:uppercase; padding:2px 7px; border-radius:2px; color:var(--frag-brass); border:1px solid rgba(138,112,64,0.28); background:var(--frag-brass-dim); flex-shrink:0; }
+        .frag-rule { font-family:var(--mono); font-size:8px; letter-spacing:0.08em; color:var(--text-dim); border:1px solid var(--border2); padding:2px 7px; border-radius:2px; flex-shrink:0; }
+        .frag-summary { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--text-mid); flex:1; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .frag-chevron { font-family:var(--mono); font-size:9px; color:var(--text-dim); transition:transform 0.2s; flex-shrink:0; }
+        .frag-chevron.open { transform:rotate(180deg); }
+        .fragment-row-body { display:none; padding:0 16px 16px; border-top:1px solid var(--border); }
+        .fragment-row-body.open { display:block; }
+        .frag-clause { font-family:var(--mono); font-size:10px; color:var(--text-mid); line-height:1.8; padding:12px 14px; background:var(--surface2); border-radius:3px; margin-top:12px; margin-bottom:10px; border-left:2px solid var(--border3); }
+        .frag-reason { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--text-mid); line-height:1.65; }
+
+        /* Audit */
+        .audit-section { opacity:0; animation:fadeUp 0.7s ease forwards 0.37s; }
+        .audit-btn { display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.14em; color:var(--text-dim); background:none; border:1px solid var(--border2); padding:10px 16px; border-radius:4px; cursor:pointer; transition:color 0.2s,border-color 0.2s; }
+        .audit-btn:hover { color:var(--text-mid); border-color:var(--border3); }
+        .audit-chev { transition:transform 0.25s; font-size:9px; }
+        .audit-chev.open { transform:rotate(180deg); }
+        .audit-panel { overflow:hidden; max-height:0; transition:max-height 0.5s ease; margin-top:10px; }
+        .audit-panel.open { max-height:8000px; }
+        .a-stage { margin-bottom:3px; }
+        .a-stage-head { display:flex; align-items:center; gap:12px; padding:11px 16px; background:var(--surface); border:1px solid var(--border); border-radius:4px 4px 0 0; cursor:pointer; transition:background 0.15s; }
+        .a-stage-head:hover { background:var(--surface2); }
+        .a-stage-head.collapsed { border-radius:4px; margin-bottom:3px; }
+        .a-stage-head.collapsed .a-chev { transform:rotate(-90deg); }
+        .a-num { font-family:var(--mono); font-size:9px; color:var(--text-dim); min-width:14px; }
+        .a-title { font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.10em; color:var(--text-mid); flex:1; }
+        .a-badge { font-family:var(--mono); font-size:8px; padding:2px 7px; border-radius:2px; background:var(--ver-green-dim); color:var(--ver-green); border:1px solid rgba(61,122,106,0.2); }
+        .a-badge.brass { background:var(--frag-brass-dim); color:var(--frag-brass); border-color:rgba(138,112,64,0.2); }
+        .a-chev { font-family:var(--mono); font-size:9px; color:var(--text-dim); transition:transform 0.2s; }
+        .a-body { background:var(--surface); border:1px solid var(--border); border-top:none; border-radius:0 0 4px 4px; overflow:hidden; max-height:2000px; transition:max-height 0.4s ease; margin-bottom:3px; }
+        .a-body.hidden { max-height:0; }
+        .a-inner { padding:16px 18px; }
+        .a-desc { font-family:var(--sans); font-size:11px; font-weight:300; color:var(--text-mid); line-height:1.7; }
+        footer { border-top:1px solid var(--border); padding:20px 48px; display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; }
+        .footer-note { font-family:var(--mono); font-size:9px; color:var(--text-dim); letter-spacing:0.08em; }
+        .footer-link { font-family:var(--mono); font-size:9px; color:var(--text-dim); text-decoration:none; letter-spacing:0.08em; transition:color 0.2s; }
+        .footer-link:hover { color:var(--text-mid); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(7px);} to{opacity:1;transform:translateY(0);} }
+        @media(max-width:640px) {
+            header,footer{padding:0 20px;}
+            main{padding:56px 24px 100px;}
+            .seal-body{padding:32px 24px 28px;}
+            .seal-footer{grid-template-columns:1fr;}
+            .seal-field{border-right:none;}
+            .seal-field:nth-last-child(-n+2){border-bottom:1px solid var(--border);}
+            .seal-field:last-child{border-bottom:none;}
+        }
+</style>
+</head>
+<body>
+
+<header>
+    <a href="/"><img src="validity-logo.png" alt="Validity" /></a>
+    <span class="nav-label">Verification Report</span>
+</header>
+
+<main>
+
+    <span class="doc-eyebrow">Formal Verification</span>
+    <h1 class="doc-title">Freddie Mac Credit Risk Administration Agreement</h1>
+
+    
+    <div class="result-seal">
+        <div class="seal-body">
+            <div class="seal-outcome ">No contradiction proven.</div>
+            <div class="seal-counts">29 commitments verified &nbsp;·&nbsp; 7 outside fragment</div>
+            <div class="seal-state-row">
+                <span class="seal-pill sat">SAT</span>
+                <span class="seal-meta-item">LFS v2.0</span>
+                <span class="seal-sep">·</span>
+                <span class="seal-meta-item">Z3 4.15.x</span>
+                <span class="seal-sep">·</span>
+                <span class="seal-meta-item">Proof ID: 0803e29a71a21ec3…</span>
+            </div>
+        </div>
+        <div class="seal-footer">
+            <div class="seal-field">
+                <div class="seal-field-label">Document type</div>
+                <div class="seal-field-value">Credit risk administration agreement</div>
+            </div>
+            <div class="seal-field">
+                <div class="seal-field-label">Timestamp</div>
+                <div class="seal-field-value">2026-05-25 23:48:13 UTC</div>
+            </div>
+            <div class="seal-field">
+                <div class="seal-field-label">Commitments verified</div>
+                <div class="seal-field-value">29</div>
+            </div>
+            <div class="seal-field">
+                <div class="seal-field-label">Document hash</div>
+                <div class="seal-field-value proof">0803e29a71a21ec3b06c905a…</div>
+            </div>
+        </div>
+    </div>
+
+    <p class="phil">Formal verification does not determine whether a document is legally sound. It determines whether the commitments it contains can all be true at the same time. That is a different — and prior — question.</p>
+
+    
+
+    
+    <div class="verified-section">
+        <div class="sec-head">
+            <span class="sec-label">Verified Commitments</span>
+            <span class="sec-count">29 passed</span>
+        </div>
+        <div class="verified-list">
+            <div class="verified-item">
+                <div>
+                    <div class="verified-item-name">29 commitments</div>
+                    <div class="verified-item-desc">All formally verified within LFS v2. No logical contradiction proven among the analysed set.</div>
+                </div>
+                <div class="verified-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="fragment-section">
+        <div class="sec-head">
+            <span class="sec-label">Outside Fragment</span>
+            <span class="sec-count">7 · human attestation required</span>
+        </div>
+        <p class="fragment-intro">The system does not refuse judgment arbitrarily. Each refusal has a precise reason. These commitments require human review before they can be relied upon with the same confidence as the verified set.</p>
+        
+        <div class="fragment-row">
+            <div class="fragment-row-head" onclick="toggleFrag(this)">
+                <span class="frag-tag">Modal</span>
+                <span class="frag-rule">TRANSLATION</span>
+                <span class="frag-summary">Not later than two Business Days prior to each Payment Date, the…</span>
+                <span class="frag-chevron">▾</span>
+            </div>
+            <div class="fragment-row-body">
+                <div class="frag-clause">Not later than two Business Days prior to each Payment Date, the Indenture Trustee shall calculate the Transfer Amount, Return Reimbursement Amount and Return Amount, if any, payable pursuant to Sections 2 and 3 and deliver a payment notification substantially in the form of Exhibit A (“Payment Notification”) to Freddie Mac and the Trust.</div>
+                <div class="frag-reason">Unresolved modal term in source text: &#x27;substantial&#x27;</div>
+            </div>
+        </div>
+        <div class="fragment-row">
+            <div class="fragment-row-head" onclick="toggleFrag(this)">
+                <span class="frag-tag">Modal</span>
+                <span class="frag-rule">TRANSLATION</span>
+                <span class="frag-summary">The events that may give rise to an Early Termination Date shall…</span>
+                <span class="frag-chevron">▾</span>
+            </div>
+            <div class="fragment-row-body">
+                <div class="frag-clause">The events that may give rise to an Early Termination Date shall be as set forth in the definition of “Early Termination Date” in the Glossary.</div>
+                <div class="frag-reason">The claim contains unresolvable modal terms and ambiguity regarding the definition and conditions of &#x27;Early Termination Date&#x27;.</div>
+            </div>
+        </div>
+        <div class="fragment-row">
+            <div class="fragment-row-head" onclick="toggleFrag(this)">
+                <span class="frag-tag">Temporal</span>
+                <span class="frag-rule">TRANSLATION</span>
+                <span class="frag-summary">The performance of the Reference Pool during the period commencing at the…</span>
+                <span class="frag-chevron">▾</span>
+            </div>
+            <div class="fragment-row-body">
+                <div class="frag-clause">The performance of the Reference Pool during the period commencing at the end of the final Reporting Period and continuing until the Termination Date shall be disregarded under this Agreement for purposes of calculating the final payment obligations.</div>
+                <div class="frag-reason">The claim involves temporal terms that are not discrete, named points in time, and the condition is ambiguous regarding the specific actions to be disregarded.</div>
+            </div>
+        </div>
+        <div class="fragment-row">
+            <div class="fragment-row-head" onclick="toggleFrag(this)">
+                <span class="frag-tag">Modal</span>
+                <span class="frag-rule">TRANSLATION</span>
+                <span class="frag-summary">provided that no such amendment for the specific purposes described in clauses…</span>
+                <span class="frag-chevron">▾</span>
+            </div>
+            <div class="fragment-row-body">
+                <div class="frag-clause">provided that no such amendment for the specific purposes described in clauses (iii) through (v) above shall adversely affect in any material respect the interests of the Noteholders, as evidenced by the receipt by the Indenture Trustee of an Opinion of Counsel or an Officer’s Certificate of Freddie Mac to the effect that such change does not adversely affect in any material respect the interests of the Noteholders or, alternatively, in the case of any particular Noteholder, an acknowledgment to that effect from such Noteholder (unless such Noteholder shall have consented to such amendment);</div>
+                <div class="frag-reason">Unresolved modal term in source text: &#x27;material&#x27;</div>
+            </div>
+        </div>
+        <div class="fragment-row">
+            <div class="fragment-row-head" onclick="toggleFrag(this)">
+                <span class="frag-tag">Modal</span>
+                <span class="frag-rule">TRANSLATION</span>
+                <span class="frag-summary">This Agreement may also be amended from time to time by mutual…</span>
+                <span class="frag-chevron">▾</span>
+            </div>
+            <div class="fragment-row-body">
+                <div class="frag-clause">This Agreement may also be amended from time to time by mutual written agreement of the parties hereto and, if any Notes are outstanding, with the written consent of the Indenture Trustee and the consent of Holders of Notes entitled to at least a majority of the aggregate outstanding Class Principal Balance of the Notes that are materially and adversely affected by such amendment, for any other purpose;</div>
+                <div class="frag-reason">The claim contains unresolvable modal terms such as &#x27;materially and adversely affected&#x27; and lacks a clear logical structure for translation.</div>
+            </div>
+        </div>
+        <div class="fragment-row">
+            <div class="fragment-row-head" onclick="toggleFrag(this)">
+                <span class="frag-tag">Structural</span>
+                <span class="frag-rule">TRANSLATION</span>
+                <span class="frag-summary">This Agreement shall be valid, binding, and enforceable against a party when…</span>
+                <span class="frag-chevron">▾</span>
+            </div>
+            <div class="fragment-row-body">
+                <div class="frag-clause">This Agreement shall be valid, binding, and enforceable against a party when executed and delivered by an authorized individual on behalf of the party by means of (i) an original manual signature; (ii) a faxed, scanned, or photocopied manual signature, or (iii) any other electronic signature permitted by the federal Electronic Signatures in Global and National Commerce Act, state enactments of the Uniform Electronic Transactions Act, and/or any other relevant electronic signatures law, including any relevant provisions of the Uniform Commercial Code (collectively, “Signature Law”), in each case to the extent applicable.</div>
+                <div class="frag-reason">Quantifier &#x27;ForAll&#x27; at &#x27;root.operand&#x27; nested inside deontic operator — forbidden by LFS v2</div>
+            </div>
+        </div>
+        <div class="fragment-row">
+            <div class="fragment-row-head" onclick="toggleFrag(this)">
+                <span class="frag-tag">Modal</span>
+                <span class="frag-rule">TRANSLATION</span>
+                <span class="frag-summary">It is expressly understood and agreed by the parties hereto that (i)…</span>
+                <span class="frag-chevron">▾</span>
+            </div>
+            <div class="fragment-row-body">
+                <div class="frag-clause">It is expressly understood and agreed by the parties hereto that (i) this Agreement is executed and delivered by Wilmington Trust, National Association on behalf of the Trust not individually or personally but solely as owner trustee of the Trust under the Trust Agreement of the Trust dated the date hereof in the exercise of the powers and authority conferred upon and vested in Wilmington Trust, National Association as owner trustee of the Trust under such Trust Agreement, (ii) each of the representations, undertakings and agreements herein made on the part of the Trust is made and intended not as the personal representation, undertaking or agreement of Wilmington Trust, National Association, but is made and intended for the purpose of binding only the Trust and (iii) nothing herein contained shall be construed as creating any liability on the part of Wilmington Trust, National Association, individually or personally, to perform any covenant or obligation of the Trust, either expressed or implied, contained herein, all such liability, if any, being expressly waived by the parties hereto and by any Person claiming by, through or under the parties hereto.</div>
+                <div class="frag-reason">The claim contains complex legal language and disclaimers that introduce ambiguity and unresolvable modal terms, making it unsuitable for translation into the supported logical fragment.</div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="audit-section">
+        <button class="audit-btn" onclick="toggleAudit()">
+            <span id="auditLabel">Open audit trail</span>
+            <span class="audit-chev" id="auditChev">▾</span>
+        </button>
+        <div class="audit-panel" id="auditPanel">
+
+            <div class="a-stage">
+                <div class="a-stage-head" onclick="toggleAS(this)">
+                    <span class="a-num">01</span>
+                    <span class="a-title">Commitment Extraction</span>
+                    <span class="a-badge">36 extracted</span>
+                    <span class="a-chev">▾</span>
+                </div>
+                <div class="a-body">
+                    <div class="a-inner">
+                        <p class="a-desc">36 candidate commitments extracted via GPT-4o. All confirmed and submitted to Stage 2 translation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="a-stage">
+                <div class="a-stage-head collapsed" onclick="toggleAS(this)">
+                    <span class="a-num">02</span>
+                    <span class="a-title">LFS Fragment Validation</span>
+                    <span class="a-badge">29 passed</span>
+                    <span class="a-badge brass" style="margin-left:4px;">7 refused</span>
+                    <span class="a-chev">▾</span>
+                </div>
+                <div class="a-body hidden">
+                    <div class="a-inner">
+                        <p class="a-desc">29 commitments validated within LFS v2. 7 refused outside fragment.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="a-stage">
+                <div class="a-stage-head collapsed" onclick="toggleAS(this)">
+                    <span class="a-num">03</span>
+                    <span class="a-title">SMT Encoding + Z3 Solver</span>
+                    <span class="a-badge">SAT</span>
+                    <span class="a-chev">▾</span>
+                </div>
+                <div class="a-body hidden">
+                    <div class="a-inner">
+                        <p class="a-desc">29 validated commitments encoded as named Boolean assertions via assert_and_track. Z3 returned sat — no contradiction proven.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+<footer>
+    <span class="footer-note">validity.live</span>
+    <a href="/verify" class="footer-link">← Run verification</a>
+</footer>
+
+<script>
+    function toggleAudit() {
+        const p=document.getElementById('auditPanel');
+        const c=document.getElementById('auditChev');
+        const l=document.getElementById('auditLabel');
+        const o=p.classList.toggle('open');
+        c.classList.toggle('open',o);
+        l.textContent=o?'Close audit trail':'Open audit trail';
+    }
+    function toggleAS(h) {
+        h.classList.toggle('collapsed');
+        h.nextElementSibling.classList.toggle('hidden');
+    }
+    function toggleFrag(h) {
+        const body=h.nextElementSibling;
+        const chev=h.querySelector('.frag-chevron');
+        const open=body.classList.toggle('open');
+        chev.classList.toggle('open',open);
+    }
+</script>
+
+</body>
+</html>
