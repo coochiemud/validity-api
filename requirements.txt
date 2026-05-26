@@ -1,0 +1,6 @@
+flask==3.0.3
+flask-cors==4.0.1
+gunicorn==22.0.0
+openai==2.38.0
+z3-solver==4.15.4.0
+spacy==3.8.11
