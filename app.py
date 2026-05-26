@@ -56,8 +56,8 @@ def verify():
     if not document_text:
         return jsonify({"error": "Document text is empty"}), 400
 
-    if len(document_text) > 200_000:
-        return jsonify({"error": "Document too large. Maximum 200,000 characters."}), 400
+    if len(document_text) > 500_000:
+        return jsonify({"error": "Document too large. Maximum 500,000 characters."}), 400
 
     try:
         # Stage 1: Extract
