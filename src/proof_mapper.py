@@ -343,7 +343,7 @@ def render_output(output: AnalysisOutput) -> str:
         else:
             lines.append(f"  Verdict:          ✗ CONTRADICTION PROVEN")
         lines.append(f"  Failure class:    {primary.failure_class.value}")
-        lines.append(f"  Claims in core:   {len(primary.minimal_core)}")
+        lines.append(f"  Claims in core:   {len(primary.source_spans)}")
         lines.append(f"  LFS version:      {primary.lfs_version}")
         lines.append(f"  Timestamp:        {primary.timestamp}")
         if primary.document_hash:
