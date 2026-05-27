@@ -20,11 +20,21 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 from stage1_extractor       import Stage1Extractor
 from confirmation_interface import ConfirmationInterface
 from stage2_translator      import Stage2Translator
+from predicate_registry     import PredicateRegistryBuilder
 from fragment_validator     import FragmentValidator, ValidationStatus
 from z3_encoder             import Z3Encoder
 from solver_interface       import SolverInterface
 from proof_mapper           import ProofMapper, render_output
 from report_renderer        import ReportRenderer
+from document_loader        import DocumentLoader, LoadError
+from resource_constraint_encoder import ResourceConstraintEncoder, run_resource_constraint_check
+from logging_config         import setup_logging, pipeline_logger as log
+
+# Initialise logging at module level
+setup_logging(
+    level    = os.environ.get("VALIDITY_LOG_LEVEL", "INFO"),
+    log_file = os.environ.get("VALIDITY_LOG_FILE"),
+)
 
 
 # ── Pipeline ──────────────────────────────────────────────────────────────────
@@ -40,15 +50,16 @@ class ValidityPipeline:
     Output:  Proof object or clean verdict
     """
 
-    def __init__(self, auto_confirm: bool = False):
-        self.extractor    = Stage1Extractor()
-        self.gate         = ConfirmationInterface()
-        self.translator   = Stage2Translator()
-        self.validator    = FragmentValidator()
-        self.encoder      = Z3Encoder()
-        self.solver       = SolverInterface()
-        self.mapper       = ProofMapper()
-        self.auto_confirm = auto_confirm
+    def __init__(self, auto_confirm: bool = False, confidence_threshold: float = 0.80):
+        self.extractor        = Stage1Extractor(confidence_threshold=confidence_threshold)
+        self.gate             = ConfirmationInterface()
+        self.translator       = Stage2Translator()
+        self.registry_builder = PredicateRegistryBuilder()
+        self.validator        = FragmentValidator()
+        self.encoder          = Z3Encoder()
+        self.solver           = SolverInterface()
+        self.mapper           = ProofMapper()
+        self.auto_confirm     = auto_confirm
 
     def run(self, document_text: str) -> tuple:
         """
@@ -56,14 +67,12 @@ class ValidityPipeline:
         Returns (AnalysisOutput, terminal_report_string).
         """
 
-        print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        print("  VALIDITY — RUNNING ANALYSIS")
-        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+        log.info("Pipeline started")
 
         # ── Stage 1: Extraction ───────────────────────────────────────────────
-        print("Stage 1  Extracting candidate commitments...")
+        log.info("Stage 1 — extracting candidate commitments")
         candidates = self.extractor.extract(document_text)
-        print(f"         {len(candidates)} candidate(s) identified.\n")
+        log.info(f"Stage 1 — {len(candidates)} candidate(s) identified")
 
         if not candidates:
             print("No extractable commitments found. Analysis complete.")
@@ -78,8 +87,7 @@ class ValidityPipeline:
             session = self.gate.review_interactive(candidates)
 
         confirmed = session.confirmed
-        print(f"\n         {session.summary()}")
-        print(f"         {len(confirmed)} claim(s) proceeding to translation.\n")
+        log.info(f"Gate — {session.summary()}")
 
         if not confirmed:
             print("No claims confirmed. Analysis complete.")
@@ -88,7 +96,12 @@ class ValidityPipeline:
             return empty, "No claims confirmed for analysis."
 
         # ── Stage 2: Translation ──────────────────────────────────────────────
-        print("Stage 2  Translating confirmed claims to formal logic...")
+        log.info("Stage 2 — building predicate registry")
+        registry = self.registry_builder.build(confirmed)
+        self.translator.set_registry(registry)
+        log.info(f"Stage 2 — {len(registry.canonical)} canonical predicates registered")
+
+        log.info("Stage 2 — translating confirmed claims")
         translation_results = self.translator.translate_batch(confirmed)
 
         validated_claims = []
@@ -122,7 +135,7 @@ class ValidityPipeline:
                 refused_claims.append(refused)
 
         all_claims = validated_claims + refused_claims
-        print(f"         {len(validated_claims)} validated  |  {len(refused_claims)} refused (outside fragment)\n")
+        log.info(f"Stage 2 — {len(validated_claims)} validated, {len(refused_claims)} outside fragment")
 
         if not validated_claims:
             print("No claims survived translation and validation.")
@@ -149,13 +162,81 @@ class ValidityPipeline:
             return output, render_output(output)
 
         # ── Stage 3: Encoding and verification ────────────────────────────────
-        print("Stage 3  Encoding constraints and running formal verification...")
+        log.info("Stage 3 — encoding and running Z3 solver")
         encoded = [self.encoder.encode(claim) for claim in validated_claims]
         result  = self.solver.solve(encoded)
-        print(f"         Z3 verdict: {result.verdict.value}\n")
+        log.info(f"Stage 3 — Z3 verdict: {result.verdict.value}")
 
         # ── Proof mapping ─────────────────────────────────────────────────────
         output = self.mapper.map(result, all_claims, document_text=document_text)
+
+        # ── Resource constraint check (runs when main solver returns SAT) ─────
+        if result.verdict.value == "sat":
+            log.info("Stage 4 — running resource constraint check...")
+            from resource_constraint_encoder import ResourceConstraintEncoder
+            encoder   = ResourceConstraintEncoder()
+            rc_result = encoder.check_document_text(document_text)
+            if rc_result is None:
+                rc_result = run_resource_constraint_check(validated_claims)
+            if rc_result is not None:
+                is_conditional = rc_result.verdict == "conditional"
+                log.info(
+                    "Resource constraint check: %s",
+                    "conditional stress exposure detected" if is_conditional else "contradiction proven — upgrading verdict to UNSAT"
+                )
+                import hashlib, datetime
+                from proof_mapper import ProofObject, FailureClass, SourceSpan, AnalysisOutput
+                doc_hash   = hashlib.sha256(document_text.encode()).hexdigest()
+                core_spans = []
+                if rc_result.contradiction:
+                    pair = rc_result.contradiction
+                    matched_ids = set()
+                    for claim in validated_claims:
+                        if claim.id in (pair.priority_claim_id, pair.obligation_claim_id):
+                            core_spans.append(SourceSpan(
+                                claim_id    = claim.id,
+                                text        = claim.text_span,
+                                page        = getattr(claim.provenance, 'page', None),
+                                section     = getattr(claim.provenance, 'section', None),
+                                char_offset = None,
+                            ))
+                            matched_ids.add(claim.id)
+                    if not core_spans:
+                        core_spans = [
+                            SourceSpan(
+                                claim_id    = pair.priority_claim_id,
+                                text        = pair.priority_claim_text,
+                                page        = None,
+                                section     = None,
+                                char_offset = None,
+                            ),
+                            SourceSpan(
+                                claim_id    = pair.obligation_claim_id,
+                                text        = pair.obligation_claim_text,
+                                page        = None,
+                                section     = None,
+                                char_offset = None,
+                            ),
+                        ]
+
+                verdict_str   = "conditional" if is_conditional else "unsat"
+                failure_class = FailureClass.STRESS_EXPOSURE if is_conditional else FailureClass.RESOURCE_CONFLICT
+
+                proof_obj = ProofObject(
+                    verdict       = verdict_str,
+                    failure_class = failure_class,
+                    source_spans  = core_spans,
+                    formal_proof  = rc_result.formal_proof,
+                    document_hash = doc_hash[:16],
+                    timestamp     = datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    lfs_version   = "2.0",
+                )
+                output = AnalysisOutput(
+                    primary          = proof_obj,
+                    outside_fragment = output.outside_fragment,
+                    claims_analysed  = output.claims_analysed,
+                    claims_refused   = output.claims_refused,
+                )
 
         return output, render_output(output)
 
@@ -205,9 +286,10 @@ def main():
     parser.add_argument("--file",   type=str, help="Path to document file to analyse")
     parser.add_argument("--demo",   action="store_true", help="Run against built-in demo document")
     parser.add_argument("--auto",   action="store_true", help="Auto-confirm all claims (skip interactive gate)")
-    parser.add_argument("--report", type=str, help="Path to write HTML report (e.g. reports/my-report.html)")
-    parser.add_argument("--name",   type=str, help="Document name for the report title")
-    parser.add_argument("--type",   type=str, help="Document type (e.g. 'Facility agreement')")
+    parser.add_argument("--report",     type=str,   help="Path to write HTML report (e.g. reports/my-report.html)")
+    parser.add_argument("--name",       type=str,   help="Document name for the report title")
+    parser.add_argument("--type",       type=str,   help="Document type (e.g. 'Facility agreement')")
+    parser.add_argument("--confidence", type=float, default=0.80, help="Minimum confidence threshold for claim extraction (default: 0.80)")
     args = parser.parse_args()
 
     if not args.file and not args.demo:
@@ -216,20 +298,17 @@ def main():
 
     if args.demo:
         document_text = DEMO_DOCUMENT
-        print("\nRunning against demo document...")
-        print("Note: Section 4.3 prohibits distributions during the term.")
-        print("      Section 6.1 requires distributions during the term.")
-        print("      This is a direct, provable contradiction.\n")
+        log.info("Running demo document — deliberate contradiction present")
     else:
-        try:
-            with open(args.file, "r", encoding="utf-8") as f:
-                document_text = f.read()
-            print(f"\nLoaded document: {args.file} ({len(document_text)} chars)")
-        except FileNotFoundError:
-            print(f"Error: File not found: {args.file}")
+        loader = DocumentLoader()
+        result = loader.load_file(args.file)
+        if isinstance(result, LoadError):
+            log.error(f"Document load failed: {result.reason}")
             sys.exit(1)
+        document_text = result.text
+        log.info(f"Loaded: {result.filename} ({result.char_count:,} chars{f', {result.page_count} pages' if result.page_count else ''})")
 
-    pipeline = ValidityPipeline(auto_confirm=args.auto or args.demo)
+    pipeline = ValidityPipeline(auto_confirm=args.auto or args.demo, confidence_threshold=args.confidence)
     output, terminal_report = pipeline.run(document_text)
     print(terminal_report)
 
@@ -250,7 +329,7 @@ def main():
             output_path   = report_path,
             document_type = args.type or "Document",
         )
-        print(f"\nReport written to: {report_path}")
+        log.info(f"Report written to: {report_path}")
 
 
 if __name__ == "__main__":

@@ -28,12 +28,14 @@ from fragment_validator import FormalClaim, ValidationStatus
 # ── Failure classes (per LFS v2 Section 3.4) ─────────────────────────────────
 
 class FailureClass(Enum):
-    CONTRADICTION         = "Contradiction"           # φ ∧ ¬φ
-    DEONTIC_CONFLICT      = "Deontic Conflict"        # Obligated(φ) ∧ Forbidden(φ)
-    QUANTIFIER_CLASH      = "Quantifier Clash"        # ∀x P(x) ∧ ∃y ¬P(y)
-    TEMPORAL_INCONSISTENCY = "Temporal Inconsistency" # At(t, φ) ∧ At(t, ¬φ)
-    IMPLICATION_LOOP      = "Implication Loop"        # φ→ψ ∧ ψ→φ (no base)
-    GENERAL               = "Logical Contradiction"   # catch-all
+    CONTRADICTION          = "Contradiction"           # φ ∧ ¬φ
+    DEONTIC_CONFLICT       = "Deontic Conflict"        # Obligated(φ) ∧ Forbidden(φ)
+    QUANTIFIER_CLASH       = "Quantifier Clash"        # ∀x P(x) ∧ ∃y ¬P(y)
+    TEMPORAL_INCONSISTENCY = "Temporal Inconsistency"  # At(t, φ) ∧ At(t, ¬φ)
+    IMPLICATION_LOOP       = "Implication Loop"        # φ→ψ ∧ ψ→φ (no base)
+    RESOURCE_CONFLICT      = "Resource Conflict"       # Priority + absolute obligation on shared pool
+    STRESS_EXPOSURE        = "Conditional Stress Exposure"  # Priority conflict resolved by write-downs under normal conditions but exposed under stress
+    GENERAL                = "Logical Contradiction"   # catch-all
 
 
 # ── Output types ──────────────────────────────────────────────────────────────
@@ -335,7 +337,11 @@ def render_output(output: AnalysisOutput) -> str:
         lines.append(f"  {primary.note}")
 
     elif isinstance(primary, ProofObject):
-        lines.append(f"  Verdict:          ✗ CONTRADICTION PROVEN")
+        is_conditional = primary.verdict == "conditional"
+        if is_conditional:
+            lines.append(f"  Verdict:          ⚠ CONDITIONAL — Stress exposure detected")
+        else:
+            lines.append(f"  Verdict:          ✗ CONTRADICTION PROVEN")
         lines.append(f"  Failure class:    {primary.failure_class.value}")
         lines.append(f"  Claims in core:   {len(primary.minimal_core)}")
         lines.append(f"  LFS version:      {primary.lfs_version}")
@@ -343,7 +349,10 @@ def render_output(output: AnalysisOutput) -> str:
         if primary.document_hash:
             lines.append(f"  Document hash:    {primary.document_hash[:16]}...")
         lines.append("")
-        lines.append("  CONTRADICTING COMMITMENTS")
+        if is_conditional:
+            lines.append("  RELATED COMMITMENTS")
+        else:
+            lines.append("  CONTRADICTING COMMITMENTS")
         lines.append("  " + "─" * 56)
         for i, span in enumerate(primary.source_spans, 1):
             location = ""
