@@ -21,6 +21,8 @@ import os
 import uuid
 
 from openai import OpenAI
+from resilience import ResilientOpenAIClient
+from logging_config import extractor_logger as log
 
 from fragment_validator import ClaimType
 from stage2_translator import CandidateClaim
@@ -65,6 +67,11 @@ CONFIDENCE GUIDE:
 
 Respond with ONLY a JSON array of commitment objects. No explanation. No markdown. No backticks.
 
+HIERARCHY EXTRACTION (critical for correctness):
+Legal documents use nested clause structures. You must identify each claim's position
+in that hierarchy and its functional role. This determines whether it can be tested
+as a standalone obligation or only as part of a composite rule.
+
 Format:
 [
   {
@@ -72,9 +79,112 @@ Format:
     "claim_type": "obligation",
     "confidence": 0.95,
     "page_hint": 3,
-    "section_hint": "Section 4.1"
+    "section_hint": "Section 4.1",
+    "parent_clause": "clause (xiv)",
+    "hierarchy_path": ["2.5.9", "(xiv)", "(D)"],
+    "clause_role": "compliance_wrapper",
+    "is_standalone_obligation": false,
+    "requires_parent_context": true
   }
 ]
+
+FIELD DEFINITIONS:
+
+parent_clause: The immediate parent clause label. null if top-level.
+
+hierarchy_path: Full ancestry from outermost clause to this clause.
+  e.g. ["Section 2.5", "(xiv)", "(D)"]
+  For a top-level standalone obligation, include the top-level section itself.
+  Do not use [] unless the clause location is unknown.
+
+clause_role: The functional role of this clause. Must be one of:
+  - "independent_obligation"  — freestanding rule, can be tested alone
+  - "composite_rule"          — parent clause made of sub-conditions
+  - "condition"               — activation condition ("if X then...")
+  - "exception"               — carve-out from a broader rule
+  - "definition"              — defines scope or meaning
+  - "consequence"             — what happens when conditions are met
+  - "compliance_wrapper"      — self-referential compliance clause
+  - "threshold"               — numeric or quantitative limit
+  - "cross_reference"         — refers to another clause for substance
+
+is_standalone_obligation: boolean.
+  true  — this claim can be tested for contradiction independent of its parent
+  false — this claim is a fragment; only meaningful as part of its parent rule
+
+requires_parent_context: boolean.
+  true  — meaning changes or is incomplete without the parent clause
+  false — claim is self-contained
+
+CLASSIFICATION RULES:
+- A top-level "shall" or "must" with no parent = independent_obligation, standalone=true
+- A lettered sub-paragraph (A), (B), (C) within a numbered clause = condition or consequence, standalone=false
+- A compliance wrapper ("shall not... unless does not violate this clause") = compliance_wrapper, standalone=false
+- A numeric limit ("no more than 90 holders") = threshold; standalone depends on context
+- "Provided that..." carve-outs = exception, standalone=false unless the clause still states a complete rule
+- Cross-references to other sections = cross_reference, standalone=false
+
+CRITICAL DISTINCTION:
+Conditional language does NOT make a clause non-standalone.
+
+A clause may be a standalone obligation even if it contains:
+- if
+- unless
+- provided that
+- in the event that
+- subject to
+- where
+- when
+
+Mark requires_parent_context=true only when the clause is legally or grammatically incomplete without its parent clause, sibling clauses, or a referenced rule.
+
+A standalone conditional obligation contains:
+- actor
+- legal modality, such as shall, must, shall not, must not
+- action or prohibition
+- object
+- trigger condition, if any
+- timing or scope, if any
+
+Additional fields:
+
+rule_completeness: Must be one of:
+  - "complete_rule" — contains a full legal rule and can be checked by the solver
+  - "fragment"      — only meaningful as part of a parent composite rule
+  - "ambiguous"     — uncertain
+
+condition_type: Must be one of:
+  - "internal_trigger"             — condition inside a complete standalone rule
+  - "parent_activation_condition"  — condition that only operates within a parent rule
+  - "exception"                    — carve-out from a broader rule
+  - "scope_modifier"               — limits scope but does not create a separate rule
+  - "none"
+
+Example standalone conditional obligation:
+"The Company shall pay all application monies to applicants within 5 business days of the Closing Date in the event that no Shares are issued under the Offer."
+
+Classification:
+clause_role: independent_obligation
+is_standalone_obligation: true
+requires_parent_context: false
+rule_completeness: complete_rule
+condition_type: internal_trigger
+
+Reason:
+This clause contains a complete obligation with its own trigger condition.
+
+Example dependent fragment:
+"(D) such action would not cause the Issuer to fail to comply with this clause"
+
+Classification:
+clause_role: compliance_wrapper
+is_standalone_obligation: false
+requires_parent_context: true
+rule_completeness: fragment
+condition_type: parent_activation_condition
+
+Reason:
+This is a sub-condition inside a composite parent rule. It does not state an independent obligation.
 
 If no extractable commitments are found, return an empty array: []"""
 
@@ -94,10 +204,11 @@ class Stage1Extractor:
     """
 
     MODEL             = "gpt-4o"
-    LOW_CONFIDENCE_THRESHOLD = 0.70  # Claims below this are flagged for review
+    LOW_CONFIDENCE_THRESHOLD = 0.80  # Raised from 0.70 — reduces noise in extraction
 
-    def __init__(self, client: Optional[OpenAI] = None):
-        self.client = client or OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    def __init__(self, client: Optional[OpenAI] = None, confidence_threshold: float = 0.80):
+        self.client = client or ResilientOpenAIClient()
+        self.LOW_CONFIDENCE_THRESHOLD = confidence_threshold
 
     def extract(self, document_text: str) -> list[CandidateClaim]:
         """
@@ -122,12 +233,81 @@ class Stage1Extractor:
 
     def _chunk_document(self, text: str, max_chars: int = 6000) -> list[str]:
         """
-        Split document into chunks at paragraph boundaries.
-        Keeps chunks under max_chars to stay within context limits.
+        Split document into chunks at section boundaries.
+
+        Strategy:
+        1. Detect section headers using common legal document patterns
+        2. Group sections into chunks up to max_chars
+        3. Each chunk carries its section context
+        4. Fall back to paragraph splitting if no sections detected
+
+        max_chars is doubled from 6000 to 12000 — GPT-4o handles this
+        comfortably and reduces the number of cross-chunk boundary issues.
         """
+        import re
+
         if len(text) <= max_chars:
             return [text]
 
+        # Detect section headers — common patterns in legal/financial documents
+        section_pattern = re.compile(
+            r'^(?:'
+            r'(?:Section|SECTION|Article|ARTICLE|Clause|CLAUSE)\s+[\d\w.]+|'  # Section 4.1
+            r'(?:\d+\.)+\s+[A-Z]|'                                             # 4.1 TITLE
+            r'[IVXLCDM]+\.\s+[A-Z]|'                                           # IV. TITLE
+            r'(?:SCHEDULE|Schedule|EXHIBIT|Exhibit|ANNEX|Annex)\s+\w+'         # Schedule A
+            r')',
+            re.MULTILINE,
+        )
+
+        # Split into sections
+        lines     = text.split('\n')
+        sections  = []
+        current   = []
+        current_header = ""
+
+        for line in lines:
+            if section_pattern.match(line.strip()) and current:
+                sections.append((current_header, '\n'.join(current)))
+                current        = [line]
+                current_header = line.strip()
+            else:
+                current.append(line)
+
+        if current:
+            sections.append((current_header, '\n'.join(current)))
+
+        # If no sections detected, fall back to paragraph splitting
+        if len(sections) <= 1:
+            return self._chunk_by_paragraphs(text, max_chars)
+
+        # Group sections into chunks up to max_chars
+        chunks      = []
+        chunk_parts = []
+        chunk_len   = 0
+
+        for header, content in sections:
+            section_text = f"{header}\n{content}" if header else content
+            section_len  = len(section_text)
+
+            if chunk_len + section_len > max_chars and chunk_parts:
+                chunks.append('\n\n'.join(chunk_parts))
+                chunk_parts = [section_text]
+                chunk_len   = section_len
+            else:
+                chunk_parts.append(section_text)
+                chunk_len += section_len
+
+        if chunk_parts:
+            chunks.append('\n\n'.join(chunk_parts))
+
+        return chunks
+
+    def _chunk_by_paragraphs(self, text: str, max_chars: int) -> list[str]:
+        """
+        Fallback chunking by paragraph boundaries.
+        Used when no section structure is detected.
+        """
         paragraphs = text.split("\n\n")
         chunks     = []
         current    = []
@@ -164,6 +344,9 @@ class Stage1Extractor:
                 temperature = 0,
                 max_tokens  = 2000,
             )
+            if response is None:
+                log.error("API returned None after retries — skipping chunk")
+                return []
             raw = response.choices[0].message.content.strip()
 
             # Strip markdown fences if present
@@ -180,10 +363,10 @@ class Stage1Extractor:
             return [self._parse_candidate(item) for item in data if self._is_valid_item(item)]
 
         except json.JSONDecodeError as e:
-            print(f"[Extractor] JSON parse error: {e}")
+            log.warning(f"JSON parse error in extraction: {e}")
             return []
         except Exception as e:
-            print(f"[Extractor] API error: {e}")
+            log.error(f"API error in extraction: {e}")
             return []
 
     # ── Parsing ───────────────────────────────────────────────────────────────
@@ -195,12 +378,19 @@ class Stage1Extractor:
         confidence     = float(item.get("confidence", 0.8))
 
         return CandidateClaim(
-            id         = str(uuid.uuid4()),
-            text_span  = item["text_span"].strip(),
-            claim_type = claim_type,
-            confidence = min(max(confidence, 0.0), 1.0),
-            page       = item.get("page_hint"),
-            section    = item.get("section_hint"),
+            id                       = str(uuid.uuid4()),
+            text_span                = item["text_span"].strip(),
+            claim_type               = claim_type,
+            confidence               = min(max(confidence, 0.0), 1.0),
+            page                     = item.get("page_hint"),
+            section                  = item.get("section_hint"),
+            parent_clause            = item.get("parent_clause"),
+            hierarchy_path           = item.get("hierarchy_path"),
+            clause_role              = item.get("clause_role"),
+            is_standalone_obligation = item.get("is_standalone_obligation", True),
+            requires_parent_context  = item.get("requires_parent_context", False),
+            rule_completeness        = item.get("rule_completeness"),
+            condition_type           = item.get("condition_type"),
         )
 
     def _parse_claim_type(self, raw: str) -> ClaimType:
@@ -231,15 +421,70 @@ class Stage1Extractor:
 
     def _deduplicate(self, candidates: list[CandidateClaim]) -> list[CandidateClaim]:
         """
-        Remove duplicate candidates by text_span.
+        Remove duplicate candidates across chunks.
+
+        Two-pass deduplication:
+        Pass 1 — Exact match on normalised text span
+        Pass 2 — Near-duplicate detection using token overlap
+                  (catches same commitment extracted from overlapping chunks
+                   with slightly different whitespace or truncation)
+
         Keeps the highest-confidence version of each unique span.
         """
-        seen:   dict[str, CandidateClaim] = {}
-        for candidate in candidates:
-            key = candidate.text_span.strip().lower()
-            if key not in seen or candidate.confidence > seen[key].confidence:
-                seen[key] = candidate
-        return list(seen.values())
+        if not candidates:
+            return []
+
+        # Pass 1: exact normalised match
+        exact: dict[str, CandidateClaim] = {}
+        for c in candidates:
+            key = self._normalise_span(c.text_span)
+            if key not in exact or c.confidence > exact[key].confidence:
+                exact[key] = c
+
+        deduped = list(exact.values())
+
+        # Pass 2: near-duplicate detection via token overlap
+        # Two spans are near-duplicates if their token overlap > 0.85
+        final   = []
+        used    = set()
+
+        for i, c1 in enumerate(deduped):
+            if i in used:
+                continue
+            group = [c1]
+            for j, c2 in enumerate(deduped):
+                if j <= i or j in used:
+                    continue
+                if self._token_overlap(c1.text_span, c2.text_span) > 0.85:
+                    group.append(c2)
+                    used.add(j)
+            # Keep highest confidence from the group
+            best = max(group, key=lambda c: c.confidence)
+            final.append(best)
+            used.add(i)
+
+        return final
+
+    def _normalise_span(self, text: str) -> str:
+        """Normalise a text span for exact matching."""
+        import re
+        text = text.lower().strip()
+        text = re.sub(r'\s+', ' ', text)
+        text = text.strip('.,;:"\'')
+        return text
+
+    def _token_overlap(self, a: str, b: str) -> float:
+        """
+        Compute token overlap between two strings.
+        Returns a float in [0, 1] — 1.0 means identical token sets.
+        """
+        tokens_a = set(a.lower().split())
+        tokens_b = set(b.lower().split())
+        if not tokens_a or not tokens_b:
+            return 0.0
+        intersection = tokens_a & tokens_b
+        union        = tokens_a | tokens_b
+        return len(intersection) / len(union)
 
     # ── Confidence flagging ───────────────────────────────────────────────────
 

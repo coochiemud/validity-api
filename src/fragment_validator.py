@@ -106,12 +106,23 @@ class FormalClaim:
     Output of Stage 2 translation, input to the Fragment Validator.
     The validator populates status and rejection fields.
     """
-    id:          str
-    formula:     dict            # AST as nested dict
-    claim_type:  ClaimType
-    confidence:  float
-    provenance:  Provenance
-    text_span:   str             # verbatim source text
+    id:                      str
+    formula:                 dict            # AST as nested dict
+    claim_type:              ClaimType
+    confidence:              float
+    provenance:              Provenance
+    text_span:               str             # verbatim source text
+    parent_clause:            Optional[str]  = None
+    hierarchy_path:           Optional[list] = None
+    clause_role:              Optional[str]  = None
+    is_standalone_obligation: bool           = True
+    requires_parent_context:  bool           = False
+    rule_completeness:        Optional[str]  = None
+    condition_type:           Optional[str]  = None
+    canonical_action:         Optional[str]  = None
+    temporal_operator:        Optional[str]  = None
+    temporal_bound_days:      Optional[int]  = None
+    polarity:                 Optional[bool] = None
 
     # Populated by validator
     status:      ValidationStatus = ValidationStatus.OUTSIDE_FRAGMENT
@@ -218,7 +229,13 @@ class FragmentValidator:
             )
 
         # Recursively validate AST
-        return self._validate_node(claim.formula, path="root", quantifier_depth=0)
+        return self._validate_node(
+            claim.formula,
+            path             = "root",
+            quantifier_depth = 0,
+            inside_deontic   = False,
+            inside_quantifier = False,
+        )
 
     def _validate_node(
         self,
@@ -226,6 +243,7 @@ class FragmentValidator:
         path: str,
         quantifier_depth: int,
         inside_deontic: bool = False,
+        inside_quantifier: bool = False,
     ) -> Optional[RejectionRecord]:
         """
         Recursively validate an AST node.
@@ -254,19 +272,19 @@ class FragmentValidator:
             return self._validate_predicate(node, path)
 
         elif node_type in (NodeType.AND, NodeType.OR, NodeType.IMPLIES):
-            return self._validate_binary(node, node_type, path, quantifier_depth, inside_deontic)
+            return self._validate_binary(node, node_type, path, quantifier_depth, inside_deontic, inside_quantifier)
 
         elif node_type == NodeType.NOT:
-            return self._validate_unary(node, path, quantifier_depth, inside_deontic)
+            return self._validate_unary(node, path, quantifier_depth, inside_deontic, inside_quantifier)
 
         elif node_type in (NodeType.FORALL, NodeType.EXISTS):
-            return self._validate_quantifier(node, node_type, path, quantifier_depth, inside_deontic)
+            return self._validate_quantifier(node, node_type, path, quantifier_depth, inside_deontic, inside_quantifier)
 
         elif node_type in (NodeType.OBLIGATED, NodeType.FORBIDDEN, NodeType.PERMITTED):
-            return self._validate_deontic(node, node_type, path, quantifier_depth)
+            return self._validate_deontic(node, node_type, path, quantifier_depth, inside_quantifier)
 
         elif node_type == NodeType.AT:
-            return self._validate_temporal(node, path, quantifier_depth, inside_deontic)
+            return self._validate_temporal(node, path, quantifier_depth, inside_deontic, inside_quantifier)
 
         return None
 
@@ -301,6 +319,7 @@ class FragmentValidator:
         path: str,
         quantifier_depth: int,
         inside_deontic: bool,
+        inside_quantifier: bool,
     ) -> Optional[RejectionRecord]:
         # R05 — Binary operators require left and right children
         for child_key in ("left", "right"):
@@ -312,9 +331,10 @@ class FragmentValidator:
                 )
             result = self._validate_node(
                 node[child_key],
-                path=f"{path}.{child_key}",
-                quantifier_depth=quantifier_depth,
-                inside_deontic=inside_deontic,
+                path              = f"{path}.{child_key}",
+                quantifier_depth  = quantifier_depth,
+                inside_deontic    = inside_deontic,
+                inside_quantifier = inside_quantifier,
             )
             if result:
                 return result
@@ -326,6 +346,7 @@ class FragmentValidator:
         path: str,
         quantifier_depth: int,
         inside_deontic: bool,
+        inside_quantifier: bool,
     ) -> Optional[RejectionRecord]:
         # R05 — Not requires a single child
         if "operand" not in node:
@@ -336,9 +357,10 @@ class FragmentValidator:
             )
         return self._validate_node(
             node["operand"],
-            path=f"{path}.operand",
-            quantifier_depth=quantifier_depth,
-            inside_deontic=inside_deontic,
+            path              = f"{path}.operand",
+            quantifier_depth  = quantifier_depth,
+            inside_deontic    = inside_deontic,
+            inside_quantifier = inside_quantifier,
         )
 
     def _validate_quantifier(
@@ -348,8 +370,9 @@ class FragmentValidator:
         path: str,
         quantifier_depth: int,
         inside_deontic: bool,
+        inside_quantifier: bool,
     ) -> Optional[RejectionRecord]:
-        # R08 — Deontic operators must not contain quantifiers
+        # R08 — Quantifier must not be inside a deontic operator
         if inside_deontic:
             return RejectionRecord(
                 reason        = f"Quantifier '{node_type.value}' at '{path}' nested inside deontic operator — forbidden by LFS v2",
@@ -397,9 +420,10 @@ class FragmentValidator:
 
         return self._validate_node(
             node["body"],
-            path=f"{path}.body",
-            quantifier_depth=new_depth,
-            inside_deontic=inside_deontic,
+            path              = f"{path}.body",
+            quantifier_depth  = new_depth,
+            inside_deontic    = inside_deontic,
+            inside_quantifier = True,  # flag — deontics inside quantifiers now caught
         )
 
     def _validate_deontic(
@@ -408,7 +432,16 @@ class FragmentValidator:
         node_type: NodeType,
         path: str,
         quantifier_depth: int,
+        inside_quantifier: bool,
     ) -> Optional[RejectionRecord]:
+        # R08 — Deontic must not be inside a quantifier
+        if inside_quantifier:
+            return RejectionRecord(
+                reason        = f"Deontic operator '{node_type.value}' at '{path}' nested inside quantifier — forbidden by LFS v2",
+                rule_violated = "R08",
+                node_path     = path,
+            )
+
         if "operand" not in node:
             return RejectionRecord(
                 reason        = f"{node_type.value} at '{path}' missing 'operand'",
@@ -417,9 +450,10 @@ class FragmentValidator:
             )
         return self._validate_node(
             node["operand"],
-            path=f"{path}.operand",
-            quantifier_depth=quantifier_depth,
-            inside_deontic=True,  # flag for R08
+            path              = f"{path}.operand",
+            quantifier_depth  = quantifier_depth,
+            inside_deontic    = True,
+            inside_quantifier = inside_quantifier,
         )
 
     def _validate_temporal(
@@ -428,6 +462,7 @@ class FragmentValidator:
         path: str,
         quantifier_depth: int,
         inside_deontic: bool,
+        inside_quantifier: bool,
     ) -> Optional[RejectionRecord]:
         # R09 — Temporal nodes must have a time_label
         if "time_label" not in node or not isinstance(node["time_label"], str) or not node["time_label"].strip():
@@ -442,11 +477,13 @@ class FragmentValidator:
                 rule_violated = "R09",
                 node_path     = path,
             )
+        # Propagate both flags through At — R08 applies transitively
         return self._validate_node(
             node["body"],
-            path=f"{path}.body",
-            quantifier_depth=quantifier_depth,
-            inside_deontic=inside_deontic,
+            path              = f"{path}.body",
+            quantifier_depth  = quantifier_depth,
+            inside_deontic    = inside_deontic,
+            inside_quantifier = inside_quantifier,
         )
 
     def _check_modal_terms(self, text: str) -> Optional[str]:

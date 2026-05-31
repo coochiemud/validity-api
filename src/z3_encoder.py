@@ -34,11 +34,22 @@ class EncodedClaim:
     A validated claim encoded as Z3 expressions.
     Ready for submission to the Solver Interface (Component 3).
     """
-    claim_id:    str
-    constraints: list          # List of z3.ExprRef
-    declarations: dict         # name -> z3.ExprRef (all declared symbols)
-    provenance:  str           # verbatim source text span
-    claim_type:  ClaimType
+    claim_id:                 str
+    constraints:              list          # List of z3.ExprRef
+    declarations:             dict          # name -> z3.ExprRef (all declared symbols)
+    provenance:               str           # verbatim source text span
+    claim_type:               ClaimType
+    parent_clause:            str  = None
+    hierarchy_path:           list = None
+    clause_role:              str  = None
+    is_standalone_obligation: bool = True
+    requires_parent_context:  bool = False
+    rule_completeness:        str  = None
+    condition_type:           str  = None
+    canonical_action:         str  = None
+    temporal_operator:        str  = None
+    temporal_bound_days:      int  = None
+    polarity:                 bool = None
 
 
 @dataclass
@@ -81,11 +92,22 @@ class Z3Encoder:
         try:
             constraint = self._encode_node(claim.formula)
             return EncodedClaim(
-                claim_id     = claim.id,
-                constraints  = [constraint],
-                declarations = dict(self._symbols),
-                provenance   = claim.text_span,
-                claim_type   = claim.claim_type,
+                claim_id                 = claim.id,
+                constraints              = [constraint],
+                declarations             = dict(self._symbols),
+                provenance               = claim.text_span,
+                claim_type               = claim.claim_type,
+                parent_clause            = getattr(claim, "parent_clause", None),
+                hierarchy_path           = getattr(claim, "hierarchy_path", None),
+                clause_role              = getattr(claim, "clause_role", None),
+                is_standalone_obligation = getattr(claim, "is_standalone_obligation", True),
+                requires_parent_context  = getattr(claim, "requires_parent_context", False),
+                rule_completeness        = getattr(claim, "rule_completeness", None),
+                condition_type           = getattr(claim, "condition_type", None),
+                canonical_action         = getattr(claim, "canonical_action", None),
+                temporal_operator        = getattr(claim, "temporal_operator", None),
+                temporal_bound_days      = getattr(claim, "temporal_bound_days", None),
+                polarity                 = getattr(claim, "polarity", None),
             )
         except Exception as e:
             return EncodingError(

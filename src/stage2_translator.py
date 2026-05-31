@@ -19,6 +19,8 @@ import json
 import os
 
 from openai import OpenAI
+from resilience import ResilientOpenAIClient
+from logging_config import translator_logger as log
 
 from fragment_validator import (
     FragmentValidator,
@@ -26,8 +28,61 @@ from fragment_validator import (
     ClaimType,
     ValidationStatus,
     Provenance,
+    RejectionRecord,
     make_claim,
 )
+
+# ── Temporal subsumption helpers ──────────────────────────────────────────────
+import re as _re
+
+def _extract_within_days(text: str):
+    if not text:
+        return None
+    m = _re.search(r"\bwithin\s+(\d+)\s+(?:business\s+|calendar\s+)?days?\b", text.lower())
+    return int(m.group(1)) if m else None
+
+def _normalize_action_subject(text: str):
+    t = (text or "").lower()
+    if ("application monies" in t or "application money" in t) and (
+        "pay" in t or "payment" in t or "make any payment" in t
+    ):
+        return "pay_application_monies"
+    return None
+
+def _detect_payment_polarity(text: str):
+    t = (text or "").lower()
+    prohibitions = [
+        "shall not make any payment", "shall not pay",
+        "must not make any payment", "must not pay",
+        "may not make any payment", "may not pay",
+        "not make any payment",
+    ]
+    if any(p in t for p in prohibitions):
+        return False
+    obligations = ["shall pay", "must pay", "will pay",
+                   "shall make payment", "must make payment"]
+    if any(o in t for o in obligations):
+        return True
+    return None
+
+def _enrich_temporal(text: str) -> dict:
+    """Return canonical temporal fields if pattern matches, else empty dict."""
+    action   = _normalize_action_subject(text)
+    days     = _extract_within_days(text)
+    polarity = _detect_payment_polarity(text)
+    if action and days is not None and polarity is not None:
+        return {
+            "canonical_action":    action,
+            "temporal_operator":   "within_days",
+            "temporal_bound_days": days,
+            "polarity":            polarity,
+        }
+    return {}
+
+
+    FragmentValidator,
+    FormalClaim,
+
 
 
 # ── Candidate claim (from Stage 1) ────────────────────────────────────────────
@@ -38,12 +93,19 @@ class CandidateClaim:
     Output of Stage 1 extraction, confirmed by human gate.
     Input to Stage 2 translation.
     """
-    id:         str
-    text_span:  str
-    claim_type: ClaimType
-    confidence: float
-    page:       Optional[int] = None
-    section:    Optional[str] = None
+    id:                      str
+    text_span:               str
+    claim_type:              ClaimType
+    confidence:              float
+    page:                    Optional[int]  = None
+    section:                 Optional[str]  = None
+    parent_clause:            Optional[str]  = None
+    hierarchy_path:           list           = None
+    clause_role:              Optional[str]  = None
+    is_standalone_obligation: bool           = True
+    requires_parent_context:  bool           = False
+    rule_completeness:        Optional[str]  = None
+    condition_type:           Optional[str]  = None
 
 
 # ── Translation result ────────────────────────────────────────────────────────
@@ -137,9 +199,28 @@ class Stage2Translator:
 
     MODEL = "gpt-4o"
 
-    def __init__(self, client: Optional[OpenAI] = None):
-        self.client    = client or OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    def __init__(self, client: Optional[OpenAI] = None, registry=None):
+        self.client    = client or ResilientOpenAIClient()
         self.validator = FragmentValidator()
+        self.registry  = registry  # Optional PredicateRegistry
+
+    def set_registry(self, registry) -> None:
+        """Set the predicate registry for this translation session."""
+        self.registry = registry
+
+    def _get_system_prompt(self) -> str:
+        """Build system prompt, injecting registry context if available."""
+        base = SYSTEM_PROMPT
+        if self.registry:
+            from predicate_registry import build_registry_prompt_injection
+            injection = build_registry_prompt_injection(self.registry)
+            if injection:
+                # Insert before the final instruction line
+                base = base.replace(
+                    "Respond with ONLY valid JSON.",
+                    injection + "\n\nRespond with ONLY valid JSON."
+                )
+        return base
 
     def translate(self, candidate: CandidateClaim) -> TranslationResult:
         """
@@ -169,16 +250,24 @@ class Stage2Translator:
         # Step 4: Build FormalClaim and run through Fragment Validator
         import uuid
         formal_claim = FormalClaim(
-            id         = candidate.id,
-            formula    = ast,
-            claim_type = candidate.claim_type,
-            confidence = candidate.confidence,
-            provenance = Provenance(
+            id                       = candidate.id,
+            formula                  = ast,
+            claim_type               = candidate.claim_type,
+            confidence               = candidate.confidence,
+            provenance               = Provenance(
                 text_span = candidate.text_span,
                 page      = candidate.page,
                 section   = candidate.section,
             ),
-            text_span  = candidate.text_span,
+            text_span                = candidate.text_span,
+            parent_clause            = getattr(candidate, "parent_clause", None),
+            hierarchy_path           = getattr(candidate, "hierarchy_path", None),
+            clause_role              = getattr(candidate, "clause_role", None),
+            is_standalone_obligation = getattr(candidate, "is_standalone_obligation", True),
+            requires_parent_context  = getattr(candidate, "requires_parent_context", False),
+            rule_completeness        = getattr(candidate, "rule_completeness", None),
+            condition_type           = getattr(candidate, "condition_type", None),
+            **_enrich_temporal(candidate.text_span),
         )
 
         result = self.validator.validate(formal_claim)
@@ -302,12 +391,15 @@ class Stage2Translator:
             response = self.client.chat.completions.create(
                 model    = self.MODEL,
                 messages = [
-                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "system", "content": self._get_system_prompt()},
                     {"role": "user",   "content": user_message},
                 ],
                 temperature = 0,       # deterministic
                 max_tokens  = 500,
             )
+            if response is None:
+                log.error(f"API returned None after retries for claim {candidate.id[:8]}")
+                return None
             raw = response.choices[0].message.content.strip()
 
             # Strip markdown fences if present
@@ -320,10 +412,10 @@ class Stage2Translator:
             return json.loads(raw)
 
         except json.JSONDecodeError as e:
-            print(f"[Translator] JSON parse error for claim {candidate.id[:8]}: {e}")
+            log.warning(f"JSON parse error for claim {candidate.id[:8]}: {e}")
             return None
         except Exception as e:
-            print(f"[Translator] API error for claim {candidate.id[:8]}: {e}")
+            log.error(f"API error for claim {candidate.id[:8]}: {e}")
             return None
 
 

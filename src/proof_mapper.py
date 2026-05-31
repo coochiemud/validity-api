@@ -258,7 +258,9 @@ class ProofMapper:
         for i, entry in enumerate(solver_result.core, 1):
             lines.append(f"{i}. [{entry.claim_id[:8]}...]")
             lines.append(f"   Source: \"{entry.provenance}\"")
-            lines.append(f"   Constraint: {entry.constraint}")
+            # Handle both CoreEntry and raw EncodedClaim objects
+        constraint = getattr(entry, "constraint", None) or getattr(entry, "provenance", "—")
+        lines.append(f"   Constraint: {constraint}")
         lines.append("=" * 40)
         lines.append("Z3 verdict: unsat")
         lines.append("These constraints cannot simultaneously hold.")
