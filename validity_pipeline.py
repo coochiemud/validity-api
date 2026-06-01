@@ -245,6 +245,47 @@ class ValidityPipeline:
                     claims_refused   = output.claims_refused,
                 )
 
+            # ── Stage 4b: priority cycle check ────────────────────────────────
+            # Runs only when output is still SAT after Stage 4a.
+            from proof_mapper import CleanVerdict
+            if isinstance(output.primary, CleanVerdict):
+                log.info("Stage 4 — running priority cycle check...")
+                from priority_cycle_encoder import PriorityCycleEncoder, run_priority_cycle_check
+                from proof_mapper import ProofObject, FailureClass, SourceSpan, AnalysisOutput
+                pc_encoder = PriorityCycleEncoder()
+                pc_result  = pc_encoder.check_document_text(document_text)
+                if pc_result is None:
+                    pc_result = run_priority_cycle_check(all_claims)
+                if pc_result is not None:
+                    log.info("Priority cycle detected — upgrading verdict to UNSAT")
+                    import hashlib, datetime
+                    doc_hash   = hashlib.sha256(document_text.encode()).hexdigest()
+                    core_spans = [
+                        SourceSpan(
+                            claim_id    = edge.clause_id,
+                            text        = edge.source_text,
+                            page        = None,
+                            section     = None,
+                            char_offset = None,
+                        )
+                        for edge in pc_result.cycle_edges
+                    ]
+                    proof_obj = ProofObject(
+                        verdict       = "unsat",
+                        failure_class = FailureClass.PRIORITY_CYCLE,
+                        source_spans  = core_spans,
+                        formal_proof  = pc_result.formal_proof,
+                        document_hash = doc_hash[:16],
+                        timestamp     = datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                        lfs_version   = "2.0",
+                    )
+                    output = AnalysisOutput(
+                        primary          = proof_obj,
+                        outside_fragment = output.outside_fragment,
+                        claims_analysed  = output.claims_analysed,
+                        claims_refused   = output.claims_refused,
+                    )
+
         return output, render_output(output)
 
 

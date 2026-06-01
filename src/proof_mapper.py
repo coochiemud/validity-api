@@ -36,6 +36,7 @@ class FailureClass(Enum):
     IMPLICATION_LOOP       = "Implication Loop"        # φ→ψ ∧ ψ→φ (no base)
     RESOURCE_CONFLICT      = "Resource Conflict"       # Priority + absolute obligation on shared pool
     NUMERIC_IMPOSSIBILITY  = "Numeric Impossibility"   # Minimum allocations sum > 100%
+    PRIORITY_CYCLE         = "Priority Cycle"          # Circular priority ordering A > B > C > A
     STRESS_EXPOSURE        = "Conditional Stress Exposure"  # Priority conflict resolved by write-downs under normal conditions but exposed under stress
     GENERAL                = "Logical Contradiction"   # catch-all
 
