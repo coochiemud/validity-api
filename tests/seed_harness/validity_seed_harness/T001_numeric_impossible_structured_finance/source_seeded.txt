@@ -1,0 +1,27 @@
+SOURCE EXTRACT — CLEAN CONTROL
+Document: Bank of America Auto Trust 2012-1 Prospectus Supplement
+Section: Priority of Payments / Reserve Account
+
+On each payment date, the paying agent will withdraw funds from the Reserve Account to cover any shortfalls in the amounts required to be paid on that payment date with respect to clauses first through ninth under “—Priority of Payments.” On each payment date, funds will be deposited into the Reserve Account in accordance with the priority of payments until the amount on deposit in the Reserve Account equals the Specified Reserve Account Balance.
+
+On each payment date, except after acceleration of the notes after an event of default under the indenture, the indenture trustee will make the following payments and deposits to the extent of Available Collections and the Reserve Account Draw Amount then on deposit in the Collection Account for such payment date, in the following order of priority:
+
+first, to the servicer, the servicing fee and all unpaid servicing fees with respect to prior periods;
+second, to the Class A noteholders, pro rata, interest on the Class A notes;
+third, to the Principal Distribution Account for distribution to the noteholders, the First Allocation of Principal, if any;
+fourth, to the Class B noteholders, interest on the Class B notes;
+fifth, to the Principal Distribution Account for distribution to the noteholders, the Second Allocation of Principal, if any;
+sixth, to the Class C noteholders, interest on the Class C notes;
+seventh, to the Principal Distribution Account for distribution to the noteholders, the Third Allocation of Principal, if any;
+eighth, to the Class D noteholders, interest on the Class D notes;
+ninth, to the Principal Distribution Account for distribution to the noteholders, the Fourth Allocation of Principal, if any;
+thirteenth, to the Certificate Distribution Account, any remaining funds.
+
+
+SEEDED CONTRADICTION — NUMERIC IMPOSSIBILITY
+
+For harness testing only, insert the following synthetic clauses after the Priority of Payments paragraph:
+
+For each payment date, the Trust must allocate at least sixty percent (60%) of Available Collections to Class A noteholders.
+For each payment date, the Trust must allocate at least fifty percent (50%) of Available Collections to Class B noteholders.
+For each payment date, total allocations from Available Collections must not exceed one hundred percent (100%) of Available Collections.

@@ -1,0 +1,14 @@
+{
+  "result": "unsat",
+  "failure_class": "Numeric Impossibility / Resource Conflict",
+  "core": [
+    "C1_ClassA_min_60",
+    "C2_ClassB_min_50",
+    "C3_total_allocation_max_100"
+  ],
+  "logic": [
+    "ClassA >= 60",
+    "ClassB >= 50",
+    "ClassA + ClassB <= 100"
+  ]
+}

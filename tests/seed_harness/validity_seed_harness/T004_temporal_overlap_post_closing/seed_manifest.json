@@ -1,0 +1,30 @@
+{
+  "test_id": "T004_temporal_overlap_post_closing",
+  "source_document": "Loan and Security Agreement",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1832415/000110465921114328/mcad-20210909xex10d23.htm",
+  "source_note": "SEC lines 399-402 show post-closing conditions with a 30-day deadline.",
+  "contradiction_is_synthetic": true,
+  "expected_result": {
+    "result": "unsat",
+    "failure_class": "Temporal Conflict / Impossible Deadline",
+    "core": [
+      "T1_evidence_due_by_day_30",
+      "T2_policy_effective_not_before_day_45",
+      "T3_evidence_after_policy_effective"
+    ],
+    "logic": [
+      "evidence_date <= effective_date + 30",
+      "policy_effective_date >= effective_date + 45",
+      "evidence_date >= policy_effective_date"
+    ]
+  },
+  "pipeline_components_exercised": [
+    "extraction",
+    "normalization",
+    "translation",
+    "fragment validation",
+    "solver encoding",
+    "unsat core mapping",
+    "report generation"
+  ]
+}

@@ -1,0 +1,7 @@
+SOURCE EXTRACT — CLEAN CONTROL
+Document: Loan and Security Agreement
+Section: Post-Closing Conditions
+
+As soon as possible, but no later than the date that is thirty (30) days after the Effective Date (or such later date as reasonably agreed by Agent), Borrower shall deliver to Agent, evidence reasonably satisfactory to Agent that the insurance policies and endorsements required by Section 6.7 hereof are in full force and effect, together with appropriate evidence showing lender loss payable and/or additional insured clauses or endorsements in favor of Agent.
+
+For each Collateral Account owned by the Borrower as of the Closing Date, the Borrower shall satisfy the requirements of Section 6.8(c) with respect to such account by the date of the initial Term Loan Advance.

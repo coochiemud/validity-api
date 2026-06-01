@@ -1,0 +1,7 @@
+SOURCE EXTRACT — CLEAN CONTROL
+Document: Series A Preferred Stock Certificate of Designation
+Section: Definitions / Transfer Rights
+
+“Eligible Transferee” means a Permitted Transferee or a Person which receives shares of Series A Preferred Stock pursuant to a Permitted Transfer.
+
+A Holder can transfer any shares of Series A Preferred Stock to an Eligible Transferee at any time.

@@ -1,0 +1,18 @@
+SOURCE EXTRACT — CLEAN CONTROL
+Document: Amended and Restated ABL Intercreditor Agreement
+Section: Lien Priorities
+
+Any Lien on the ABL Priority Collateral securing any ABL Obligations now or hereafter held by or for the benefit of or on behalf of any ABL Secured Party or any agent or trustee therefor shall be senior in right, priority, operation, effect and in all other respects to any Lien on the ABL Priority Collateral securing any Term Loan/Notes Obligations now or hereafter held by or for the benefit or on behalf of any Term Loan/Notes Secured Party or any agent or trustee therefor.
+
+Any Lien on the ABL Priority Collateral securing any Term Loan/Notes Obligations now or hereafter held by or for the benefit of or on behalf of any Term Loan/Notes Secured Party or any agent or trustee therefor shall be junior and subordinate in all respects to all Liens on the ABL Priority Collateral securing any ABL Obligations now or hereafter held by or for the benefit or on behalf of any ABL Secured Party or any agent or trustee therefor.
+
+Any Lien on the Term Loan/Notes Priority Collateral securing any Term Loan/Notes Obligations now or hereafter held by or for the benefit of or on behalf of any Term Loan/Notes Secured Party or any agent or trustee therefor shall be senior in right, priority, operation, effect and in all other respects to any Lien on the Term Loan/Notes Priority Collateral securing any ABL Obligations now or hereafter held by or for the benefit or on behalf of any ABL Secured Party or any agent or trustee therefor.
+
+
+SEEDED CONTRADICTION — ORDINAL CIRCULARITY
+
+For harness testing only, insert the following synthetic priority clauses into the lien priority section:
+
+For the Seeded Test Collateral, ABL Secured Parties shall have first priority over Term Loan/Notes Secured Parties.
+For the Seeded Test Collateral, Term Loan/Notes Secured Parties shall have first priority over Mezzanine Secured Parties.
+For the Seeded Test Collateral, Mezzanine Secured Parties shall have first priority over ABL Secured Parties.

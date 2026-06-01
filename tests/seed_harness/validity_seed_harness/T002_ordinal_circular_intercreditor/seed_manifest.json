@@ -1,0 +1,31 @@
+{
+  "test_id": "T002_ordinal_circular_intercreditor",
+  "source_document": "Amended and Restated ABL Intercreditor Agreement",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1108109/000119312518201300/d598914dex44.htm",
+  "source_note": "SEC lines 683-691 show lien priority language and senior/junior ranking.",
+  "contradiction_is_synthetic": true,
+  "expected_result": {
+    "result": "unsat",
+    "failure_class": "Ordinal Circularity / Priority Cycle",
+    "core": [
+      "C1_ABL_before_Term",
+      "C2_Term_before_Mezz",
+      "C3_Mezz_before_ABL"
+    ],
+    "logic": [
+      "Before(ABL, Term)",
+      "Before(Term, Mezzanine)",
+      "Before(Mezzanine, ABL)",
+      "strict_order_acyclic"
+    ]
+  },
+  "pipeline_components_exercised": [
+    "extraction",
+    "normalization",
+    "translation",
+    "fragment validation",
+    "solver encoding",
+    "unsat core mapping",
+    "report generation"
+  ]
+}

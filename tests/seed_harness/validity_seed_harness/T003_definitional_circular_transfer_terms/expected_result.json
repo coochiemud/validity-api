@@ -1,0 +1,13 @@
+{
+  "result": "outside_fragment_or_definition_graph_failure",
+  "failure_class": "Definitional Circularity / Ungrounded Definition Graph",
+  "core": [
+    "D1_EligibleTransferee_depends_on_PermittedTransfer",
+    "D2_PermittedTransfer_depends_on_EligibleTransferee"
+  ],
+  "logic": [
+    "EligibleTransferee(x) := receives_via(PermittedTransfer)",
+    "PermittedTransfer(t) := transfer_to(EligibleTransferee)",
+    "definition_graph_cycle(EligibleTransferee, PermittedTransfer)"
+  ]
+}

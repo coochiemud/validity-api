@@ -1,0 +1,29 @@
+{
+  "test_id": "T003_definitional_circular_transfer_terms",
+  "source_document": "Series A Preferred Stock Certificate of Designation",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1334978/000119312519135029/d735979dex41.htm",
+  "source_note": "SEC lines 340 and 848 show Eligible Transferee and transfer language.",
+  "contradiction_is_synthetic": true,
+  "expected_result": {
+    "result": "outside_fragment_or_definition_graph_failure",
+    "failure_class": "Definitional Circularity / Ungrounded Definition Graph",
+    "core": [
+      "D1_EligibleTransferee_depends_on_PermittedTransfer",
+      "D2_PermittedTransfer_depends_on_EligibleTransferee"
+    ],
+    "logic": [
+      "EligibleTransferee(x) := receives_via(PermittedTransfer)",
+      "PermittedTransfer(t) := transfer_to(EligibleTransferee)",
+      "definition_graph_cycle(EligibleTransferee, PermittedTransfer)"
+    ]
+  },
+  "pipeline_components_exercised": [
+    "extraction",
+    "normalization",
+    "translation",
+    "fragment validation",
+    "solver encoding",
+    "unsat core mapping",
+    "report generation"
+  ]
+}

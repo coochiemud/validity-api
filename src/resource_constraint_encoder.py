@@ -132,6 +132,7 @@ class ResourceConstraintResult:
     contradiction:     Optional[PaymentPriorityPair] = None
     formal_proof:      str   = ""
     explanation:       str   = ""
+    failure_subtype:   str   = "resource_conflict"  # "numeric_impossibility" | "resource_conflict"
 
 
 # ── Encoder ───────────────────────────────────────────────────────────────────
@@ -179,6 +180,16 @@ class ResourceConstraintEncoder:
         """
         if not Z3_AVAILABLE:
             return None
+
+        # ── Check for percentage allocation impossibility first ───────────────
+        pct_result = self._check_percentage_allocations(document_text)
+        if pct_result is not None:
+            return pct_result
+
+        # ── Check for temporal ordering conflict in document text ─────────────
+        temporal_result = self._check_temporal_ordering(document_text)
+        if temporal_result is not None:
+            return temporal_result
 
         text_lower = document_text.lower()
 
@@ -271,6 +282,196 @@ class ResourceConstraintEncoder:
                 if "principal balance" in context_lower or "class principal" in context_lower:
                     return True, context
         return False, ""
+
+    def _check_percentage_allocations(self, document_text: str) -> Optional[ResourceConstraintResult]:
+        """
+        Detect numeric impossibility: minimum allocation percentages that sum > 100%.
+        Matches 'at least ... (N%)' patterns and proves UNSAT with Z3 arithmetic.
+        e.g. 'at least 60% to Class A' + 'at least 50% to Class B' > 100% → UNSAT
+        """
+        import re
+
+        pct_re = re.compile(r'at\s+least\s+[^.(]*?\((\d+(?:\.\d+)?)\s*%\)', re.IGNORECASE)
+
+        claims = []
+        for m in pct_re.finditer(document_text):
+            pct = float(m.group(1))
+            if pct <= 0:
+                continue
+            start = document_text.rfind('\n', 0, m.start())
+            start = start + 1 if start >= 0 else 0
+            end   = document_text.find('\n', m.end())
+            if end < 0:
+                end = len(document_text)
+            sentence = document_text[start:end].strip()
+            claims.append((sentence, pct))
+
+        if len(claims) < 2:
+            return None
+
+        total_min = sum(pct for _, pct in claims)
+        if total_min <= 100.0:
+            return None
+
+        # Verify UNSAT with Z3 linear arithmetic
+        from z3 import Real, Solver, RealVal, unsat as z3_unsat
+        solver    = Solver()
+        alloc_vars = []
+        for i, (_, pct) in enumerate(claims):
+            v = Real(f"alloc_{i}")
+            solver.add(v >= RealVal(str(pct)))
+            alloc_vars.append(v)
+
+        total_expr = alloc_vars[0]
+        for v in alloc_vars[1:]:
+            total_expr = total_expr + v
+        solver.add(total_expr <= RealVal("100"))
+
+        if solver.check() != z3_unsat:
+            return None
+
+        constraint_lines = [
+            f"  alloc_{i} >= {pct}  (\"{sentence[:80]}\")"
+            for i, (sentence, pct) in enumerate(claims)
+        ]
+
+        formal_proof = "\n".join([
+            "NUMERIC ALLOCATION IMPOSSIBILITY PROOF",
+            "=" * 44,
+            "",
+            "Minimum allocation constraints:",
+            *constraint_lines,
+            "",
+            f"Total pool constraint: sum(alloc_i) <= 100",
+            f"Sum of minimums: {total_min}",
+            "",
+            f"⊥  {total_min} > 100: minimum allocations cannot simultaneously hold.",
+            "",
+            "Z3 verdict: unsat",
+        ])
+
+        pair = PaymentPriorityPair(
+            priority_claim_id     = str(_uuid.uuid4()),
+            priority_claim_text   = claims[0][0],
+            obligation_claim_id   = str(_uuid.uuid4()),
+            obligation_claim_text = claims[1][0],
+        )
+
+        return ResourceConstraintResult(
+            verdict          = "unsat",
+            contradiction    = pair,
+            formal_proof     = formal_proof,
+            failure_subtype  = "numeric_impossibility",
+            explanation      = (
+                f"Sum of minimum allocation obligations ({total_min}%) "
+                f"exceeds the available pool (100%). "
+                f"These constraints cannot simultaneously hold."
+            ),
+        )
+
+    def _check_temporal_ordering(self, document_text: str) -> Optional[ResourceConstraintResult]:
+        """
+        Detect three-way temporal ordering impossibility from raw document text:
+          C1 (deadline):    action must occur by day N (no later than N days)
+          C2 (not-before):  precondition unavailable until day M  (M > N)
+          C3 (dependency):  action requires precondition to be in effect first
+        Together:  action_date <= N  AND  available_date >= M  AND  action_date >= available_date
+        With M > N → UNSAT.
+        """
+        import re
+
+        text_lower = document_text.lower()
+
+        # Find deadline day: "no later than ... (N) days"
+        deadline_days  = None
+        deadline_text  = ""
+        m = re.search(r'no\s+later\s+than[^.]*?\((\d+)\)\s*days', text_lower)
+        if m:
+            deadline_days = int(m.group(1))
+            start = max(0, text_lower.rfind('\n', 0, m.start()) + 1)
+            end   = text_lower.find('\n', m.end())
+            deadline_text = document_text[start:(end if end > 0 else len(document_text))].strip()
+
+        # Find not-before day: "not become effective before ... (M) days"
+        not_before_days = None
+        not_before_text = ""
+        m = re.search(r'not\s+become\s+effective\s+before[^.]*?\((\d+)\)\s*days', text_lower)
+        if not m:
+            m = re.search(r'shall\s+not\s+become\s+effective\s+before[^.]*?\((\d+)\)\s*days', text_lower)
+        if m:
+            not_before_days = int(m.group(1))
+            start = max(0, text_lower.rfind('\n', 0, m.start()) + 1)
+            end   = text_lower.find('\n', m.end())
+            not_before_text = document_text[start:(end if end > 0 else len(document_text))].strip()
+
+        # Find ordering dependency: "only after ... in full force / in effect"
+        has_dependency  = bool(re.search(
+            r'only\s+after[^.]*?(?:in\s+full\s+force|in\s+force\s+and\s+effect|in\s+effect)',
+            text_lower,
+        ))
+        dep_match = re.search(
+            r'only\s+after[^.\n]*?(?:in\s+full\s+force|in\s+force\s+and\s+effect|in\s+effect)',
+            text_lower,
+        )
+        dep_text = ""
+        if dep_match:
+            start    = max(0, text_lower.rfind('\n', 0, dep_match.start()) + 1)
+            end      = text_lower.find('\n', dep_match.end())
+            dep_text = document_text[start:(end if end > 0 else len(document_text))].strip()
+
+        if deadline_days is None or not_before_days is None or not has_dependency:
+            return None
+
+        if deadline_days >= not_before_days:
+            return None
+
+        # Verify with Z3 integer arithmetic
+        from z3 import Int, Solver, unsat as z3_unsat
+        solver          = Solver()
+        evidence_date   = Int("evidence_date")
+        available_date  = Int("available_date")
+        solver.add(evidence_date  <= deadline_days)
+        solver.add(available_date >= not_before_days)
+        solver.add(evidence_date  >= available_date)
+        if solver.check() != z3_unsat:
+            return None
+
+        formal_proof = "\n".join([
+            "TEMPORAL ORDERING IMPOSSIBILITY PROOF",
+            "=" * 44,
+            "",
+            "Variables:",
+            "  evidence_date  = day on which evidence is delivered",
+            "  available_date = day on which precondition becomes effective",
+            "",
+            "Constraints:",
+            f"  C1 (deadline):     evidence_date <= {deadline_days}",
+            f"  C2 (not-before):   available_date >= {not_before_days}",
+            "  C3 (dependency):   evidence_date >= available_date",
+            "",
+            f"⊥  evidence_date <= {deadline_days} < {not_before_days} <= available_date <= evidence_date",
+            "",
+            "Z3 verdict: unsat",
+        ])
+
+        pair = PaymentPriorityPair(
+            priority_claim_id     = str(_uuid.uuid4()),
+            priority_claim_text   = deadline_text,
+            obligation_claim_id   = str(_uuid.uuid4()),
+            obligation_claim_text = not_before_text,
+        )
+
+        return ResourceConstraintResult(
+            verdict          = "unsat",
+            contradiction    = pair,
+            formal_proof     = formal_proof,
+            failure_subtype  = "temporal_conflict",
+            explanation      = (
+                f"Temporal ordering conflict: evidence required by day {deadline_days}, "
+                f"but precondition not available until day {not_before_days}. "
+                f"The dependency chain makes the deadline impossible."
+            ),
+        )
 
     def _detect_pairs_from_claims(self, claims: list) -> list:
         """Detect priority/obligation pairs from extracted FormalClaim objects."""

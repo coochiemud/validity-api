@@ -1,0 +1,30 @@
+{
+  "test_id": "T001_numeric_impossible_structured_finance",
+  "source_document": "Bank of America Auto Trust 2012-1 Prospectus Supplement",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1488082/000119312512149853/d309744d424b3.htm",
+  "source_note": "SEC lines 5179-5237 show reserve account mechanics and priority of payments.",
+  "contradiction_is_synthetic": true,
+  "expected_result": {
+    "result": "unsat",
+    "failure_class": "Numeric Impossibility / Resource Conflict",
+    "core": [
+      "C1_ClassA_min_60",
+      "C2_ClassB_min_50",
+      "C3_total_allocation_max_100"
+    ],
+    "logic": [
+      "ClassA >= 60",
+      "ClassB >= 50",
+      "ClassA + ClassB <= 100"
+    ]
+  },
+  "pipeline_components_exercised": [
+    "extraction",
+    "normalization",
+    "translation",
+    "fragment validation",
+    "solver encoding",
+    "unsat core mapping",
+    "report generation"
+  ]
+}

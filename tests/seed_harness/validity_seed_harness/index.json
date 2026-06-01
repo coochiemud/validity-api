@@ -1,0 +1,30 @@
+[
+  {
+    "test_id": "T001_numeric_impossible_structured_finance",
+    "source_document": "Bank of America Auto Trust 2012-1 Prospectus Supplement",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1488082/000119312512149853/d309744d424b3.htm",
+    "expected": "unsat",
+    "failure_class": "Numeric Impossibility / Resource Conflict"
+  },
+  {
+    "test_id": "T002_ordinal_circular_intercreditor",
+    "source_document": "Amended and Restated ABL Intercreditor Agreement",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1108109/000119312518201300/d598914dex44.htm",
+    "expected": "unsat",
+    "failure_class": "Ordinal Circularity / Priority Cycle"
+  },
+  {
+    "test_id": "T003_definitional_circular_transfer_terms",
+    "source_document": "Series A Preferred Stock Certificate of Designation",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1334978/000119312519135029/d735979dex41.htm",
+    "expected": "outside_fragment_or_definition_graph_failure",
+    "failure_class": "Definitional Circularity / Ungrounded Definition Graph"
+  },
+  {
+    "test_id": "T004_temporal_overlap_post_closing",
+    "source_document": "Loan and Security Agreement",
+    "source_url": "https://www.sec.gov/Archives/edgar/data/1832415/000110465921114328/mcad-20210909xex10d23.htm",
+    "expected": "unsat",
+    "failure_class": "Temporal Conflict / Impossible Deadline"
+  }
+]

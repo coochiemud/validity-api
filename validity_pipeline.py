@@ -142,6 +142,7 @@ class ValidityPipeline:
             from proof_mapper import CleanVerdict, AnalysisOutput
             output = AnalysisOutput(
                 primary         = CleanVerdict(
+                    verdict         = "outside_fragment",
                     claims_analysed = 0,
                     claims_refused  = len(refused_claims),
                     note            = "All claims were outside the supported logical fragment.",
@@ -220,7 +221,13 @@ class ValidityPipeline:
                         ]
 
                 verdict_str   = "conditional" if is_conditional else "unsat"
-                failure_class = FailureClass.STRESS_EXPOSURE if is_conditional else FailureClass.RESOURCE_CONFLICT
+                subtype = getattr(rc_result, 'failure_subtype', '')
+                failure_class = (
+                    FailureClass.STRESS_EXPOSURE       if is_conditional
+                    else FailureClass.NUMERIC_IMPOSSIBILITY if subtype == 'numeric_impossibility'
+                    else FailureClass.TEMPORAL_CONFLICT    if subtype == 'temporal_conflict'
+                    else FailureClass.RESOURCE_CONFLICT
+                )
 
                 proof_obj = ProofObject(
                     verdict       = verdict_str,

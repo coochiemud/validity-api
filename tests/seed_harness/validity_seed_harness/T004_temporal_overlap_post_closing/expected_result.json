@@ -1,0 +1,14 @@
+{
+  "result": "unsat",
+  "failure_class": "Temporal Conflict / Impossible Deadline",
+  "core": [
+    "T1_evidence_due_by_day_30",
+    "T2_policy_effective_not_before_day_45",
+    "T3_evidence_after_policy_effective"
+  ],
+  "logic": [
+    "evidence_date <= effective_date + 30",
+    "policy_effective_date >= effective_date + 45",
+    "evidence_date >= policy_effective_date"
+  ]
+}

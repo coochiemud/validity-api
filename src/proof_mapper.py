@@ -32,8 +32,10 @@ class FailureClass(Enum):
     DEONTIC_CONFLICT       = "Deontic Conflict"        # Obligated(φ) ∧ Forbidden(φ)
     QUANTIFIER_CLASH       = "Quantifier Clash"        # ∀x P(x) ∧ ∃y ¬P(y)
     TEMPORAL_INCONSISTENCY = "Temporal Inconsistency"  # At(t, φ) ∧ At(t, ¬φ)
+    TEMPORAL_CONFLICT      = "Temporal Conflict"       # Ordering conflict: deadline < availability
     IMPLICATION_LOOP       = "Implication Loop"        # φ→ψ ∧ ψ→φ (no base)
     RESOURCE_CONFLICT      = "Resource Conflict"       # Priority + absolute obligation on shared pool
+    NUMERIC_IMPOSSIBILITY  = "Numeric Impossibility"   # Minimum allocations sum > 100%
     STRESS_EXPOSURE        = "Conditional Stress Exposure"  # Priority conflict resolved by write-downs under normal conditions but exposed under stress
     GENERAL                = "Logical Contradiction"   # catch-all
 
@@ -149,7 +151,11 @@ class ProofMapper:
             # UNSAT — build proof object
             core_claim_ids = [entry.claim_id for entry in solver_result.core]
             source_spans   = self._extract_source_spans(core_claim_ids, claim_index)
-            failure_class  = self._classify_failure(core_claim_ids, claim_index)
+            hint = getattr(solver_result, "failure_class_hint", "")
+            if hint == "temporal_conflict":
+                failure_class = FailureClass.TEMPORAL_CONFLICT
+            else:
+                failure_class = self._classify_failure(core_claim_ids, claim_index)
             formal_proof   = self._compile_formal_proof(solver_result)
             summary        = self._build_summary(source_spans, failure_class)
 
@@ -328,7 +334,22 @@ def render_output(output: AnalysisOutput) -> str:
     primary = output.primary
 
     if isinstance(primary, CleanVerdict):
-        lines.append(f"  Verdict:          ✓ CLEAN — No contradiction proven")
+        # Promote to outside_fragment when:
+        # 1. All claims were refused (claims_analysed == 0 and claims_refused > 0), OR
+        # 2. All refusals are definitional — the contradiction-bearing content is
+        #    entirely outside the supported fragment even if peripheral claims validated.
+        all_definitional_refusals = (
+            len(output.outside_fragment) > 0
+            and all(
+                "defines a term" in r.get("reason", "").lower()
+                for r in output.outside_fragment
+            )
+        )
+        is_outside = (primary.claims_analysed == 0 and primary.claims_refused > 0) or all_definitional_refusals
+        if is_outside:
+            lines.append(f"  Verdict:          ○ OUTSIDE FRAGMENT — All claims outside supported fragment")
+        else:
+            lines.append(f"  Verdict:          ✓ CLEAN — No contradiction proven")
         lines.append(f"  Claims analysed:  {primary.claims_analysed}")
         lines.append(f"  Claims refused:   {primary.claims_refused}")
         lines.append(f"  LFS version:      {primary.lfs_version}")

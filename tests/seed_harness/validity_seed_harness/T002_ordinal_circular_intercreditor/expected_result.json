@@ -1,0 +1,15 @@
+{
+  "result": "unsat",
+  "failure_class": "Ordinal Circularity / Priority Cycle",
+  "core": [
+    "C1_ABL_before_Term",
+    "C2_Term_before_Mezz",
+    "C3_Mezz_before_ABL"
+  ],
+  "logic": [
+    "Before(ABL, Term)",
+    "Before(Term, Mezzanine)",
+    "Before(Mezzanine, ABL)",
+    "strict_order_acyclic"
+  ]
+}

@@ -158,6 +158,7 @@ class FragmentValidator:
       R10 — No forbidden modal terms in any text field
       R11 — Confidence must be a float in [0, 1]
       R12 — Provenance text_span must be non-empty
+      R13 — Definitional claims (clause_role == "definition") are outside the fragment
     """
 
     MAX_QUANTIFIER_DEPTH = 1
@@ -210,6 +211,15 @@ class FragmentValidator:
             return RejectionRecord(
                 reason        = "Provenance text_span is empty",
                 rule_violated = "R12",
+            )
+
+        # R13 — Definitional claims are outside the supported logical fragment.
+        # The fragment encodes obligations, prohibitions, permissions, and conditions —
+        # not term definitions. Definitions cannot be checked for contradiction.
+        if getattr(claim, "clause_role", None) == "definition":
+            return RejectionRecord(
+                reason        = "The claim defines a term rather than stating an obligation.",
+                rule_violated = "R13",
             )
 
         # R10 — Modal terms in text_span

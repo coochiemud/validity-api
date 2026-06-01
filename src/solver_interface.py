@@ -40,10 +40,11 @@ class CoreEntry:
 
 @dataclass
 class SolverResult:
-    verdict:      Verdict
-    claims_count: int                    # total claims submitted
-    core:         list[CoreEntry] = field(default_factory=list)  # populated on unsat
-    note:         str = ""
+    verdict:              Verdict
+    claims_count:         int                    # total claims submitted
+    core:                 list[CoreEntry] = field(default_factory=list)  # populated on unsat
+    note:                 str = ""
+    failure_class_hint:   str = ""  # optional hint to proof mapper for failure classification
 
 
 # ── Solver Interface ──────────────────────────────────────────────────────────
@@ -90,6 +91,65 @@ class SolverInterface:
         if b_pol is True and a_pol is False and b_days <= a_days:
             return True
         return False
+
+    def _temporal_ordering_conflict_three_way(self, encoded_claims) -> Optional["SolverResult"]:
+        """
+        Detect three-way temporal ordering conflicts of the form:
+          C1 (deadline):    action must occur by day N
+          C2 (not-before):  precondition unavailable until day M  (M > N)
+          C3 (dependency):  action requires precondition to be in effect first
+        Together: action_date <= N < M <= available_date <= action_date  →  UNSAT
+        """
+        import re
+
+        deadline_claims  = []   # (days, EncodedClaim)
+        not_before_claims = []  # (days, EncodedClaim)
+        dependency_claims = []  # EncodedClaim
+
+        for ec in encoded_claims:
+            text = (getattr(ec, "provenance", "") or "").lower()
+
+            # Deadline: "no later than ... (N) days"
+            m = re.search(r'no\s+later\s+than[^.]*?\((\d+)\)\s*days', text)
+            if m:
+                deadline_claims.append((int(m.group(1)), ec))
+
+            # Not-before: "not become effective before ... (M) days"
+            m = re.search(r'not\s+become\s+effective\s+before[^.]*?\((\d+)\)\s*days', text)
+            if not m:
+                m = re.search(r'shall\s+not\s+become\s+effective\s+before[^.]*?\((\d+)\)\s*days', text)
+            if m:
+                not_before_claims.append((int(m.group(1)), ec))
+
+            # Ordering dependency: action only permitted after precondition is in effect
+            if re.search(r'only\s+after[^.]*?(?:in\s+full\s+force|in\s+force\s+and\s+effect|in\s+effect)', text):
+                dependency_claims.append(ec)
+
+        if not deadline_claims or not not_before_claims or not dependency_claims:
+            return None
+
+        for deadline_days, deadline_ec in deadline_claims:
+            for not_before_days, not_before_ec in not_before_claims:
+                if deadline_days < not_before_days:
+                    core = [deadline_ec, not_before_ec] + dependency_claims[:1]
+                    import logging
+                    logging.getLogger("validity.pipeline").info(
+                        f"Three-way temporal ordering conflict: deadline day {deadline_days} "
+                        f"< precondition available day {not_before_days}"
+                    )
+                    return SolverResult(
+                        verdict              = Verdict.UNSAT,
+                        claims_count         = len(encoded_claims),
+                        core                 = core,
+                        failure_class_hint   = "temporal_conflict",
+                        note                 = (
+                            f"Temporal ordering conflict: action required by day {deadline_days}, "
+                            f"but precondition not available until day {not_before_days}. "
+                            f"Dependency chain makes deadline impossible."
+                        ),
+                    )
+
+        return None
 
     def _is_complete_rule(self, claim) -> bool:
         """Determine if a claim is a complete standalone rule."""
@@ -160,6 +220,11 @@ class SolverInterface:
         # Pair-level filtering: only add claims that have at least one valid pair.
         solver      = z3.Solver()
         claim_index = {}   # tracker_name → EncodedClaim
+
+        # Pre-pass: check for three-way temporal ordering conflicts
+        three_way = self._temporal_ordering_conflict_three_way(encoded_claims)
+        if three_way is not None:
+            return three_way
 
         # Pre-pass: check for temporal subsumption contradictions
         for i, a in enumerate(encoded_claims):
