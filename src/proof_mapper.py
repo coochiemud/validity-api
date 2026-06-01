@@ -336,14 +336,17 @@ def render_output(output: AnalysisOutput) -> str:
     if isinstance(primary, CleanVerdict):
         # Promote to outside_fragment when:
         # 1. All claims were refused (claims_analysed == 0 and claims_refused > 0), OR
-        # 2. All refusals are definitional — the contradiction-bearing content is
-        #    entirely outside the supported fragment even if peripheral claims validated.
+        # 2. All refusals are definitional AND they outnumber validated claims —
+        #    the contradiction-bearing content is the dominant content and is entirely
+        #    outside the supported fragment. A single incidental definition in an
+        #    otherwise normal document does NOT trigger this (claims_refused <= claims_analysed).
         all_definitional_refusals = (
             len(output.outside_fragment) > 0
             and all(
                 "defines a term" in r.get("reason", "").lower()
                 for r in output.outside_fragment
             )
+            and primary.claims_refused > primary.claims_analysed
         )
         is_outside = (primary.claims_analysed == 0 and primary.claims_refused > 0) or all_definitional_refusals
         if is_outside:
