@@ -246,9 +246,14 @@ class ValidityPipeline:
                 )
 
             # ── Stage 4b: priority cycle check ────────────────────────────────
-            # Runs only when output is still SAT after Stage 4a.
-            from proof_mapper import CleanVerdict
-            if isinstance(output.primary, CleanVerdict):
+            # Runs when output is SAT (CleanVerdict) OR CONDITIONAL after Stage 4a.
+            # A formal priority cycle upgrades CONDITIONAL → UNSAT.
+            from proof_mapper import CleanVerdict, ProofObject as _PO
+            _is_conditional = (
+                isinstance(output.primary, _PO) and
+                getattr(output.primary, 'verdict', '') == 'conditional'
+            )
+            if isinstance(output.primary, CleanVerdict) or _is_conditional:
                 log.info("Stage 4 — running priority cycle check...")
                 from priority_cycle_encoder import PriorityCycleEncoder, run_priority_cycle_check
                 from proof_mapper import ProofObject, FailureClass, SourceSpan, AnalysisOutput
