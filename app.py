@@ -12,7 +12,7 @@ import tempfile
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'validity', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from stage1_extractor       import Stage1Extractor
 from confirmation_interface import ConfirmationInterface
@@ -21,8 +21,10 @@ from predicate_registry     import PredicateRegistryBuilder
 from fragment_validator     import FragmentValidator, ValidationStatus, FormalClaim, Provenance, RejectionRecord
 from z3_encoder             import Z3Encoder
 from solver_interface       import SolverInterface
-from proof_mapper           import ProofMapper
-from document_loader        import DocumentLoader, LoadError
+from proof_mapper                import ProofMapper
+from document_loader             import DocumentLoader, LoadError
+from resource_constraint_encoder import ResourceConstraintEncoder, run_resource_constraint_check
+from priority_cycle_encoder      import PriorityCycleEncoder, run_priority_cycle_check
 
 app = Flask(__name__)
 CORS(app)
@@ -36,6 +38,8 @@ encoder          = Z3Encoder()
 solver_if        = SolverInterface()
 mapper           = ProofMapper()
 loader           = DocumentLoader()
+rc_encoder       = ResourceConstraintEncoder()
+pc_encoder       = PriorityCycleEncoder()
 
 
 @app.route("/health", methods=["GET"])
@@ -161,6 +165,20 @@ def _run_pipeline(document_text: str) -> dict:
     encoded = [encoder.encode(c) for c in validated_claims]
     result  = solver_if.solve(encoded)
     output  = mapper.map(result, all_claims, document_text=document_text)
+
+    # Stage 4a: resource constraint check (runs regardless of Stage 3 verdict)
+    rc_result = run_resource_constraint_check(rc_encoder, document_text, all_claims)
+    if rc_result is not None:
+        output = rc_result
+
+    # Stage 4b: priority cycle check (runs when Stage 3/4a is clean or conditional)
+    from proof_mapper import CleanVerdict, ProofObject as _PO
+    _is_clean       = isinstance(output.primary, CleanVerdict)
+    _is_conditional = isinstance(output.primary, _PO) and getattr(output.primary, "verdict", "") == "conditional"
+    if _is_clean or _is_conditional:
+        pc_result = run_priority_cycle_check(pc_encoder, document_text, all_claims)
+        if pc_result is not None:
+            output = pc_result
 
     return _format_output(output)
 
