@@ -195,6 +195,165 @@ STYLES = """
         }
 """
 
+CARD_STYLES = """
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg:           #F8F8F6;
+            --surface:      #FFFFFF;
+            --surface2:     #F2F2EF;
+            --border:       rgba(0,0,0,0.08);
+            --border2:      rgba(0,0,0,0.13);
+            --border3:      rgba(0,0,0,0.20);
+            --text:         #111111;
+            --text-mid:     #444444;
+            --text-dim:     #888888;
+            --blue:         #1A3CC2;
+            --green:        #0F5C2E;
+            --green-bg:     #F2FAF5;
+            --green-border: rgba(15,92,46,0.22);
+            --red:          #C0111F;
+            --red-bg:       #FFF4F4;
+            --red-border:   rgba(192,17,31,0.22);
+            --mono: 'IBM Plex Mono', monospace;
+            --serif: 'GT Super', Georgia, 'Times New Roman', serif;
+            --sans: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+        header { display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:56px; background:var(--bg); border-bottom:1px solid var(--border2); }
+        .nav-brand { font-family:var(--serif); font-size:16px; font-weight:400; color:var(--blue); letter-spacing:-0.01em; }
+        .nav-label { font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); }
+
+        main { max-width:680px; margin:0 auto; padding:72px 48px 120px; }
+
+        .doc-eyebrow { font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.18em; color:var(--text-dim); margin-bottom:10px; display:block; opacity:0; animation:fadeUp 0.6s ease forwards 0.05s; }
+        .doc-title { font-family:var(--serif); font-size:clamp(20px,3vw,28px); font-weight:400; color:var(--text); line-height:1.25; letter-spacing:-0.02em; margin-bottom:48px; opacity:0; animation:fadeUp 0.6s ease forwards 0.10s; }
+
+        .verdict-block { background:var(--surface); border:1px solid var(--border2); border-radius:8px; overflow:hidden; margin-bottom:48px; opacity:0; animation:fadeUp 0.6s ease forwards 0.15s; }
+        .verdict-header { padding:36px 40px 28px; border-bottom:1px solid var(--border); }
+        .verdict-label { font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.16em; color:var(--text-dim); margin-bottom:14px; }
+        .verdict-text { font-family:var(--serif); font-size:clamp(24px,3.6vw,36px); font-weight:400; line-height:1.1; letter-spacing:-0.025em; margin-bottom:18px; }
+        .verdict-text.clean { color:var(--green); }
+        .verdict-text.unsat { color:var(--red); }
+        .verdict-pill { display:inline-block; font-family:var(--mono); font-size:9px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; padding:4px 12px; border-radius:3px; }
+        .verdict-pill.clean { background:var(--green-bg); color:var(--green); border:1px solid var(--green-border); }
+        .verdict-pill.unsat { background:var(--red-bg); color:var(--red); border:1px solid var(--red-border); }
+        .verdict-body { padding:24px 40px; }
+        .verdict-desc { font-family:var(--sans); font-size:14px; color:var(--text-mid); line-height:1.8; }
+
+        .section { margin-bottom:44px; opacity:0; animation:fadeUp 0.6s ease forwards 0.20s; }
+        .section:nth-child(5) { animation-delay:0.25s; }
+        .section:nth-child(6) { animation-delay:0.30s; }
+        .section:nth-child(7) { animation-delay:0.35s; }
+        .section:nth-child(8) { animation-delay:0.40s; }
+        .section-label { font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.16em; color:var(--text-dim); margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+        .section-body { font-family:var(--sans); font-size:14px; color:var(--text-mid); line-height:1.8; }
+
+        .clause-item { border:1px solid var(--border2); border-radius:6px; padding:18px 22px; margin-bottom:8px; background:var(--surface2); }
+        .clause-ref { font-family:var(--mono); font-size:9px; text-transform:uppercase; letter-spacing:0.10em; color:var(--text-dim); margin-bottom:10px; }
+        .clause-text { font-family:var(--serif); font-size:14px; font-weight:400; color:var(--text); line-height:1.65; font-style:italic; }
+
+        .cert-grid { display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--border2); border-radius:6px; overflow:hidden; background:var(--surface); }
+        .cert-field { padding:16px 20px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+        .cert-field:nth-child(2n) { border-right:none; }
+        .cert-field:nth-last-child(-n+2) { border-bottom:none; }
+        .cert-field-label { font-family:var(--mono); font-size:8px; text-transform:uppercase; letter-spacing:0.14em; color:var(--text-dim); margin-bottom:6px; }
+        .cert-field-value { font-family:var(--mono); font-size:11px; color:var(--text-mid); word-break:break-all; line-height:1.4; }
+        .cert-field-value.blue { color:var(--blue); }
+
+        .caveat { font-family:var(--mono); font-size:10px; color:var(--text-dim); line-height:1.85; padding:20px 24px; background:var(--surface2); border:1px solid var(--border2); border-radius:6px; letter-spacing:0.01em; opacity:0; animation:fadeUp 0.6s ease forwards 0.45s; }
+
+        footer { border-top:1px solid var(--border2); padding:20px 48px; display:flex; align-items:center; justify-content:space-between; }
+        .footer-brand { font-family:var(--serif); font-size:13px; color:var(--blue); }
+        .footer-note { font-family:var(--mono); font-size:9px; color:var(--text-dim); letter-spacing:0.08em; }
+
+        @media(max-width:640px) {
+            header, footer { padding:0 20px; }
+            main { padding:48px 24px 80px; }
+            .verdict-header { padding:24px; }
+            .verdict-body { padding:16px 24px; }
+            .cert-grid { grid-template-columns:1fr; }
+            .cert-field { border-right:none; }
+            .cert-field:nth-last-child(-n+2) { border-bottom:1px solid var(--border); }
+            .cert-field:last-child { border-bottom:none; }
+        }
+"""
+
+_CARD_FINDING = {
+    FailureClass.DEONTIC_CONFLICT: (
+        "A deontic conflict has been formally proven: the document simultaneously obligates and forbids the same action. "
+        "The Validity system has mathematically established that compliance with both commitments is impossible.",
+        "No party can comply with all verified commitments simultaneously. "
+        "The conflict is formally proven and independently verifiable using the certificate below. "
+        "Immediate legal review of the identified clauses is recommended before relying on this document."
+    ),
+    FailureClass.CONTRADICTION: (
+        "A formal contradiction has been proven between two or more commitments in this document. "
+        "The Validity system has established that these commitments cannot all be true at the same time.",
+        "Parties cannot simultaneously satisfy all verified commitments. "
+        "The contradiction is mathematically proven and independently verifiable. "
+        "Legal review of the conflicting clauses is recommended."
+    ),
+    FailureClass.STRESS_EXPOSURE: (
+        "A conditional stress exposure has been identified. The document's waterfall or priority structure "
+        "contains competing claims that may appear consistent under normal conditions but create an unresolvable "
+        "conflict under stress scenarios.",
+        "Under stressed conditions, the identified commitments cannot all be honoured simultaneously. "
+        "Parties should assess their exposure under downside scenarios and consider whether structural protections are adequate. "
+        "Legal review of the waterfall mechanics is recommended."
+    ),
+    FailureClass.PRIORITY_CYCLE: (
+        "A circular priority ordering has been proven: the priority hierarchy defined in this document forms a cycle "
+        "where no consistent resolution exists. This is a formal impossibility.",
+        "The priority ordering cannot be satisfied in any scenario. "
+        "Parties relying on this document's priority structure cannot determine which claims take precedence. "
+        "Legal review and restructuring of the priority provisions is required."
+    ),
+    FailureClass.NUMERIC_IMPOSSIBILITY: (
+        "A numeric impossibility has been formally proven: the minimum allocation commitments in this document "
+        "sum to more than the available resource pool, making simultaneous satisfaction mathematically impossible.",
+        "The minimum commitments defined cannot all be met simultaneously under any distribution of the available resource. "
+        "This represents a structural defect that will manifest as a shortfall under normal operating conditions. "
+        "Amendment of the minimum allocation provisions is required."
+    ),
+    FailureClass.TEMPORAL_CONFLICT: (
+        "A temporal conflict has been proven: two or more commitments in this document make incompatible claims "
+        "about timing or ordering that cannot both be satisfied.",
+        "The conflicting timing commitments cannot both be satisfied simultaneously. "
+        "This creates a structural impossibility that will manifest on the relevant date. "
+        "Legal review of the deadline and timing provisions is recommended."
+    ),
+    FailureClass.TEMPORAL_INCONSISTENCY: (
+        "A temporal inconsistency has been proven: two or more commitments assert contradictory facts about the same point in time.",
+        "The document's temporal commitments are internally inconsistent. "
+        "Parties relying on these provisions cannot determine the governing rule at the relevant time. "
+        "Legal review is recommended."
+    ),
+    FailureClass.RESOURCE_CONFLICT: (
+        "A resource conflict has been proven: competing priority claims on a shared pool cannot all be satisfied simultaneously. "
+        "The Validity system has established that the combined obligations exceed what is available.",
+        "The resource commitments in this document cannot all be honoured simultaneously. "
+        "This will manifest as a shortfall when the relevant obligations fall due. "
+        "Legal review of the priority and allocation provisions is recommended."
+    ),
+    FailureClass.IMPLICATION_LOOP: (
+        "An implication loop has been proven: the conditional commitments in this document form a circular dependency "
+        "with no consistent base case. The logical chain has no ground truth.",
+        "The document's conditional logic cannot be resolved to a consistent state. "
+        "Parties relying on these conditional provisions face an unresolvable interpretation problem. "
+        "Legal review of the conditional structure is recommended."
+    ),
+    FailureClass.GENERAL: (
+        "A formal contradiction has been proven between commitments in this document. "
+        "The Validity system has established that the identified commitments cannot all be true at the same time.",
+        "Parties cannot simultaneously satisfy all verified commitments. "
+        "The contradiction is formally proven and independently verifiable. "
+        "Legal review of the conflicting clauses is recommended."
+    ),
+}
+
 SCRIPT = """
     function toggleAudit() {
         const p=document.getElementById('auditPanel');
@@ -538,6 +697,220 @@ class ReportRenderer:
         Returns the output_path for chaining.
         """
         html_content = self.render(output, document_name, document_type, permalink)
+        os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(html_content)
+        return output_path
+
+    # ── Client report card ────────────────────────────────────────────────────
+
+    def render_card(
+        self,
+        output:        AnalysisOutput,
+        document_name: str,
+        document_type: str = "Document",
+    ) -> str:
+        """
+        Render a client-facing report card.  Light validity.live design:
+        #F8F8F6 background, GT Super serif, IBM Plex Mono, #1A3CC2 blue.
+        """
+        primary      = output.primary
+        is_proof     = isinstance(primary, ProofObject)
+        is_cond      = is_proof and getattr(primary, 'verdict', '') == 'conditional'
+        timestamp    = getattr(primary, 'timestamp', datetime.now(timezone.utc).isoformat())
+        doc_hash     = getattr(primary, 'document_hash', '')
+
+        if not is_proof:
+            verdict_key   = "clean"
+            verdict_text  = "No Contradiction Found"
+            pill_class    = "clean"
+            pill_text     = "CLEAN"
+        elif is_cond:
+            verdict_key   = "conditional"
+            verdict_text  = "Stress Exposure Detected"
+            pill_class    = "unsat"
+            pill_text     = "CONDITIONAL"
+        else:
+            verdict_key   = "unsat"
+            verdict_text  = "Contradiction Proven"
+            pill_class    = "unsat"
+            pill_text     = "UNSAT"
+
+        failure_class = getattr(primary, 'failure_class', None)
+
+        if is_proof and failure_class in _CARD_FINDING:
+            finding_desc, implications = _CARD_FINDING[failure_class]
+        elif is_proof:
+            finding_desc  = (
+                "A formal contradiction has been proven between commitments in this document. "
+                "The Validity system has established that the identified commitments cannot all be true at the same time."
+            )
+            implications  = (
+                "Parties cannot simultaneously satisfy all verified commitments. "
+                "The contradiction is formally proven and independently verifiable. "
+                "Legal review of the conflicting clauses is recommended."
+            )
+        else:
+            finding_desc  = (
+                "This document has been formally verified. All extractable commitments were analysed within the "
+                "Validity Logical Framework. No commitments were found to be simultaneously impossible — "
+                "the document is internally consistent within the verified scope."
+            )
+            implications  = (
+                "Parties relying on this document can have formal assurance that its verified obligations are "
+                "not self-contradictory. This verification establishes logical consistency, not legal validity. "
+                "Commitments outside the supported fragment require separate human attestation."
+            )
+
+        ts_display = timestamp.replace("T", " ").replace("+00:00", " UTC").split(".")[0] + " UTC"
+        proof_id   = doc_hash[:16] + "…" if doc_hash else "—"
+        hash_disp  = doc_hash[:32] + "…" if len(doc_hash) > 32 else (doc_hash or "—")
+
+        source_clauses_html = self._card_source_clauses(primary) if is_proof else ""
+
+        scope_html = (
+            f"{output.claims_analysed} commitment{'s' if output.claims_analysed != 1 else ''} "
+            f"{'were' if output.claims_analysed != 1 else 'was'} formally analysed using the Validity Logical Framework "
+            f"(LFS v2.0) with the Z3 SMT solver. "
+        )
+        if output.claims_refused:
+            scope_html += (
+                f"{output.claims_refused} additional commitment{'s' if output.claims_refused != 1 else ''} "
+                f"{'were' if output.claims_refused != 1 else 'was'} identified as outside the supported logical "
+                f"fragment — these require human attestation and are not covered by this certificate."
+            )
+        else:
+            scope_html += "All extracted commitments were within the supported logical fragment."
+
+        return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validity — {html.escape(document_name)} · Report Card</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>{CARD_STYLES}</style>
+</head>
+<body>
+
+<header>
+    <span class="nav-brand">Validity</span>
+    <span class="nav-label">Verification Report Card</span>
+</header>
+
+<main>
+
+    <span class="doc-eyebrow">Formal Verification · Report Card</span>
+    <h1 class="doc-title">{html.escape(document_name)}</h1>
+
+    <div class="verdict-block">
+        <div class="verdict-header">
+            <div class="verdict-label">Verdict</div>
+            <div class="verdict-text {verdict_key}">{html.escape(verdict_text)}</div>
+            <span class="verdict-pill {pill_class}">{html.escape(pill_text)}</span>
+        </div>
+        <div class="verdict-body">
+            <p class="verdict-desc">{html.escape(finding_desc)}</p>
+        </div>
+    </div>
+
+    {source_clauses_html}
+
+    <div class="section">
+        <div class="section-label">What This Means</div>
+        <div class="section-body">{html.escape(implications)}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-label">Scope of Verification</div>
+        <div class="section-body">{html.escape(scope_html)}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-label">Verification Certificate</div>
+        <div class="cert-grid">
+            <div class="cert-field">
+                <div class="cert-field-label">Proof ID</div>
+                <div class="cert-field-value blue">{html.escape(proof_id)}</div>
+            </div>
+            <div class="cert-field">
+                <div class="cert-field-label">Verdict</div>
+                <div class="cert-field-value">{html.escape(pill_text)}</div>
+            </div>
+            <div class="cert-field">
+                <div class="cert-field-label">Document Hash (SHA-256)</div>
+                <div class="cert-field-value">{html.escape(hash_disp)}</div>
+            </div>
+            <div class="cert-field">
+                <div class="cert-field-label">Timestamp</div>
+                <div class="cert-field-value">{html.escape(ts_display)}</div>
+            </div>
+            <div class="cert-field">
+                <div class="cert-field-label">Framework</div>
+                <div class="cert-field-value">LFS v{html.escape(getattr(primary, 'lfs_version', '2.0'))}</div>
+            </div>
+            <div class="cert-field">
+                <div class="cert-field-label">Solver</div>
+                <div class="cert-field-value">Z3 4.15.x</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="caveat">
+        This report card is produced by an automated formal verification system. It establishes logical consistency
+        or inconsistency within the scope described above — it does not constitute legal advice, a legal opinion,
+        or a determination of contractual enforceability. Findings should be reviewed by qualified legal counsel
+        before any reliance is placed upon them. Validity's verification is limited to commitments expressible
+        within the supported logical fragment; commitments outside that fragment are not covered by this certificate.
+    </div>
+
+</main>
+
+<footer>
+    <span class="footer-brand">Validity</span>
+    <span class="footer-note">validity.live</span>
+</footer>
+
+</body>
+</html>"""
+
+    def _card_source_clauses(self, primary: ProofObject) -> str:
+        if not primary.source_spans:
+            return ""
+        items = ""
+        for i, span in enumerate(primary.source_spans, 1):
+            ref_parts = [f"Clause {i}"]
+            if span.section:
+                ref_parts.append(html.escape(span.section))
+            if span.page:
+                ref_parts.append(f"Page {span.page}")
+            ref_label = " &nbsp;·&nbsp; ".join(ref_parts)
+            items += f"""
+        <div class="clause-item">
+            <div class="clause-ref">{ref_label}</div>
+            <div class="clause-text">{html.escape(span.text)}</div>
+        </div>"""
+
+        return f"""
+    <div class="section">
+        <div class="section-label">Source Clauses</div>
+        {items}
+    </div>"""
+
+    def write_card(
+        self,
+        output:        AnalysisOutput,
+        document_name: str,
+        output_path:   str,
+        document_type: str = "Document",
+    ) -> str:
+        """
+        Render and write the client report card to output_path.
+        Returns the output_path for chaining.
+        """
+        html_content = self.render_card(output, document_name, document_type)
         os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(html_content)

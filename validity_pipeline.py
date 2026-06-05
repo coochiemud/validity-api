@@ -365,7 +365,7 @@ def main():
     output, terminal_report = pipeline.run(document_text)
     print(terminal_report)
 
-    # Generate HTML report if --report flag set or if file provided
+    # Generate HTML reports if --report flag set or if file provided
     if args.report or args.file:
         document_name = args.name or (
             os.path.splitext(os.path.basename(args.file))[0].replace("-", " ").replace("_", " ").title()
@@ -375,6 +375,12 @@ def main():
             os.path.splitext(args.file)[0] + "-report.html"
             if args.file else "demo-report.html"
         )
+        # Derive card path: replace trailing -report.html with -report-card.html
+        if report_path.endswith("-report.html"):
+            card_path = report_path[:-len("-report.html")] + "-report-card.html"
+        else:
+            card_path = os.path.splitext(report_path)[0] + "-card.html"
+
         renderer = ReportRenderer()
         renderer.write(
             output        = output,
@@ -382,7 +388,14 @@ def main():
             output_path   = report_path,
             document_type = args.type or "Document",
         )
+        renderer.write_card(
+            output        = output,
+            document_name = document_name,
+            output_path   = card_path,
+            document_type = args.type or "Document",
+        )
         log.info(f"Report written to: {report_path}")
+        log.info(f"Report card written to: {card_path}")
 
 
 if __name__ == "__main__":
